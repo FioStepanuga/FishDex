@@ -1,0 +1,13 @@
+{
+  "version": 2,
+  "dgSpecHash": "hUoS5Dh2uG8=",
+  "success": true,
+  "projectFilePath": "C:\\Projects\\FishDex\\FishDex.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\fstep\\.nuget\\packages\\bcrypt.net-next\\4.1.0\\bcrypt.net-next.4.1.0.nupkg.sha512",
+    "C:\\Users\\fstep\\.nuget\\packages\\microsoft.aspnetcore.openapi\\10.0.7\\microsoft.aspnetcore.openapi.10.0.7.nupkg.sha512",
+    "C:\\Users\\fstep\\.nuget\\packages\\microsoft.openapi\\2.0.0\\microsoft.openapi.2.0.0.nupkg.sha512",
+    "C:\\Users\\fstep\\.nuget\\packages\\npgsql\\10.0.2\\npgsql.10.0.2.nupkg.sha512"
+  ],
+  "logs": []
+}

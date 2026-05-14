@@ -1,0 +1,141 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Projects\\FishDex\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{750BAF08-9C6E-CD83-A867-338EE8995869}|FishDex.csproj|c:\\projects\\fishdex\\users.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{750BAF08-9C6E-CD83-A867-338EE8995869}|FishDex.csproj|solutionrelative:users.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{750BAF08-9C6E-CD83-A867-338EE8995869}|FishDex.csproj|c:\\projects\\fishdex\\controllers\\signupcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{750BAF08-9C6E-CD83-A867-338EE8995869}|FishDex.csproj|solutionrelative:controllers\\signupcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{750BAF08-9C6E-CD83-A867-338EE8995869}|FishDex.csproj|c:\\projects\\fishdex\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{750BAF08-9C6E-CD83-A867-338EE8995869}|FishDex.csproj|solutionrelative:properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{750BAF08-9C6E-CD83-A867-338EE8995869}|FishDex.csproj|c:\\projects\\fishdex\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{750BAF08-9C6E-CD83-A867-338EE8995869}|FishDex.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{750BAF08-9C6E-CD83-A867-338EE8995869}|FishDex.csproj|c:\\projects\\fishdex\\fishdex.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}",
+      "RelativeMoniker": "D:0:0:{750BAF08-9C6E-CD83-A867-338EE8995869}|FishDex.csproj|solutionrelative:fishdex.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{750BAF08-9C6E-CD83-A867-338EE8995869}|FishDex.csproj|c:\\projects\\fishdex\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{750BAF08-9C6E-CD83-A867-338EE8995869}|FishDex.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{750BAF08-9C6E-CD83-A867-338EE8995869}|FishDex.csproj|c:\\projects\\fishdex\\logs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{750BAF08-9C6E-CD83-A867-338EE8995869}|FishDex.csproj|solutionrelative:logs.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 0,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "users.cs",
+              "DocumentMoniker": "C:\\Projects\\FishDex\\users.cs",
+              "RelativeDocumentMoniker": "users.cs",
+              "ToolTip": "C:\\Projects\\FishDex\\users.cs",
+              "RelativeToolTip": "users.cs",
+              "ViewState": "AgIAACEAAAAAAAAAAAAYwC8AAAANAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-06T03:09:16.39Z",
+              "IsPinned": true,
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Bookmark",
+              "Name": "ST:0:0:{e1b7d1f8-9b3c-49b1-8f4f-bfc63a88835d}"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "launchSettings.json",
+              "DocumentMoniker": "C:\\Projects\\FishDex\\Properties\\launchSettings.json",
+              "RelativeDocumentMoniker": "Properties\\launchSettings.json",
+              "ToolTip": "C:\\Projects\\FishDex\\Properties\\launchSettings.json",
+              "RelativeToolTip": "Properties\\launchSettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-05-13T20:44:35.299Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Projects\\FishDex\\appsettings.json",
+              "RelativeDocumentMoniker": "appsettings.json",
+              "ToolTip": "C:\\Projects\\FishDex\\appsettings.json",
+              "RelativeToolTip": "appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-05-13T20:39:40.008Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "SignUpController.cs",
+              "DocumentMoniker": "C:\\Projects\\FishDex\\Controllers\\SignUpController.cs",
+              "RelativeDocumentMoniker": "Controllers\\SignUpController.cs",
+              "ToolTip": "C:\\Projects\\FishDex\\Controllers\\SignUpController.cs",
+              "RelativeToolTip": "Controllers\\SignUpController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAACQAAAAuAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-12T03:15:28.028Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "FishDex.http",
+              "DocumentMoniker": "C:\\Projects\\FishDex\\FishDex.http",
+              "RelativeDocumentMoniker": "FishDex.http",
+              "ToolTip": "C:\\Projects\\FishDex\\FishDex.http",
+              "RelativeToolTip": "FishDex.http",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAsAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003502|",
+              "WhenOpened": "2026-05-12T03:05:12.115Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "Logs.cs",
+              "DocumentMoniker": "C:\\Projects\\FishDex\\Logs.cs",
+              "RelativeDocumentMoniker": "Logs.cs",
+              "ToolTip": "C:\\Projects\\FishDex\\Logs.cs",
+              "RelativeToolTip": "Logs.cs",
+              "ViewState": "AgIAAAUAAAAAAAAAAAAAwBYAAAAkAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-10T19:56:06.627Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Projects\\FishDex\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Projects\\FishDex\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADIAAAAOAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-06T03:30:58.494Z",
+              "EditorCaption": ""
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

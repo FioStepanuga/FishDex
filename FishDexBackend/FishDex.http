@@ -1,0 +1,19 @@
+@FishDex_HostAddress = http://localhost:5177
+
+GET {{FishDex_HostAddress}}/fiodar/dad/login/
+Accept: application/json
+
+###
+POST http://localhost:5177/api/SignUp
+Content-Type: application/json
+{
+  "username": "testuser",
+  "password": "password123"
+}
+###
+POST http://10.0.2.2:5177/api/SignUp
+Content-Type: application/json
+{
+  "username": "testuser",
+  "password": "password123"
+}
