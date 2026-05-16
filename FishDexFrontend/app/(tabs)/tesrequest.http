@@ -1,6 +1,0 @@
-POST {{FishDex_HostAddress}}/api/SignUp
-Content-Type: application/json
-{
-  "username": "testuser",
-  "password": "password123"
-}
