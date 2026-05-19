@@ -1,13 +1,15 @@
 import { useAuth } from '@/context/auth';
+import { useTheme } from '@/context/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
 
 export default function AccountScreen() {
   const { username, setIsLoggedIn, setUsername } = useAuth();
   const router = useRouter();
+  const { theme, isDark, toggleTheme} = useTheme();
 
   const user = {
     username: username,
@@ -24,29 +26,39 @@ export default function AccountScreen() {
   };
 
   return (
-    <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Ionicons name="person-circle" size={100} color="#007AFF" />
-        <Text style={styles.username}>{user.username}</Text>
-        <Text style={styles.email}>{user.email}</Text>
+    <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
+      <View style={[styles.header, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
+        <Ionicons name="person-circle" size={100} color={theme.primary} />
+        <Text style={[styles.username, { color: theme.text }]}>{username}</Text>
+        <Text style={[styles.email, { color: theme.subtext }]}>student@university.edu</Text>
       </View>
 
       <View style={styles.infoSection}>
-        <Text style={styles.sectionTitle}>Profile Details</Text>
-        <View style={styles.detailRow}>
-          <Text style={styles.label}>Level:</Text>
-          <Text style={styles.value}>{user.level}</Text>
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>Profile Details</Text>
+        <View style={[styles.detailRow, { borderBottomColor: theme.border }]}>
+          <Text style={[styles.label, { color: theme.subtext }]}>Level:</Text>
+          <Text style={[styles.value, { color: theme.text }]}>42</Text>
         </View>
-        <View style={styles.detailRow}>
-          <Text style={styles.label}>Fish in Dex:</Text>
-          <Text style={styles.value}>{user.fishCaught}</Text>
+        <View style={[styles.detailRow, { borderBottomColor: theme.border }]}>
+          <Text style={[styles.label, { color: theme.subtext }]}>Fish in Dex:</Text>
+          <Text style={[styles.value, { color: theme.text }]}>12</Text>
         </View>
       </View>
 
-      <Pressable 
-        style={styles.logoutButton} 
-        onPress={handleSignOut}
-      >
+      <View style={styles.infoSection}>
+        <Text style={[styles.sectionTitle, { color: theme.text }]}>Appearance</Text>
+        <View style={[styles.detailRow, { borderBottomColor: theme.border }]}>
+          <Text style={[styles.label, { color: theme.subtext }]}>Dark Mode</Text>
+          <Switch
+            value={isDark}
+            onValueChange={toggleTheme}
+            trackColor={{ false: '#ddd', true: '#007AFF' }}
+            thumbColor={'#ffffff'}
+          />
+        </View>
+      </View>
+
+      <Pressable style={styles.logoutButton} onPress={handleSignOut}>
         <Text style={styles.logoutText}>Sign Out</Text>
       </Pressable>
     </ScrollView>
