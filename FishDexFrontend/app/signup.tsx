@@ -1,7 +1,7 @@
+import { useAuth } from '@/context/auth';
 import { useRouter } from 'expo-router';
 import React from 'react';
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
-import { useAuth } from './context/auth';
 
 export default function SignUpScreen() {
   const { username, setUsername, password, setPassword, isLoggedIn, setIsLoggedIn } = useAuth(); 

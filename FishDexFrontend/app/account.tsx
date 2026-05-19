@@ -1,4 +1,4 @@
-import { useAuth } from '@/app/context/auth';
+import { useAuth } from '@/context/auth';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -6,16 +6,21 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 
 
 export default function AccountScreen() {
-  const { username } = useAuth();  // ← pull username from context
-
+  const { username, setIsLoggedIn, setUsername } = useAuth();
   const router = useRouter();
 
-  // Temporary mock data - later you will fetch this from your C# API
   const user = {
     username: username,
-    email: "student@university.edu",
+    email: "student@university.edu",  //mock data that needs to be gotten from database eventually
     level: 42,
     fishCaught: 12,
+  };
+
+  const handleSignOut = async () => {
+    setIsLoggedIn(false);
+    setUsername('');
+    // AsyncStorage is cleared automatically via the wrapped functions above
+    router.replace('/signup');
   };
 
   return (
@@ -40,7 +45,7 @@ export default function AccountScreen() {
 
       <Pressable 
         style={styles.logoutButton} 
-        //onPress={() => router.replace('/')}
+        onPress={handleSignOut}
       >
         <Text style={styles.logoutText}>Sign Out</Text>
       </Pressable>
