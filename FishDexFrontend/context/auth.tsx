@@ -8,6 +8,8 @@ type AuthContextType = {
   setPassword: (password: string) => void;
   isLoggedIn: boolean;
   setIsLoggedIn: (value: boolean) => void;
+  token: string;
+  setToken: (token: string) => void; 
   isLoading: boolean;
 };
 
@@ -18,10 +20,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [password, setPassword] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [token, setToken] = useState('');
 
   // loads saved login state when app starts
   useEffect(() => {
     const loadAuthState = async () => {
+      const storedToken = await AsyncStorage.getItem('token');
+      if (storedToken) setToken(storedToken);
       const storedValue = await AsyncStorage.getItem('isLoggedIn');
       const storedUsername = await AsyncStorage.getItem('username');
 
@@ -49,9 +54,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     await AsyncStorage.setItem('username', value);
   };
 
+  const handleSetToken = async (value: string) => {
+    setToken(value);
+    await AsyncStorage.setItem('token', value);
+  };
+
   return (
     // using the wrapped handlers instead of the originals
-    <AuthContext.Provider value={{ username, setUsername: handleSetUsername, password, setPassword, isLoggedIn, setIsLoggedIn: handleSetIsLoggedIn, isLoading }}>
+    <AuthContext.Provider value={{ username, setUsername: handleSetUsername, password, setPassword, isLoggedIn, setIsLoggedIn: handleSetIsLoggedIn, isLoading, token, setToken: handleSetToken }}>
       {children}
     </AuthContext.Provider>
   );

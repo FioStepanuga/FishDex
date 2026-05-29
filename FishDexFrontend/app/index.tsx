@@ -8,7 +8,7 @@ export default function Index() {
   }
   
   if (!isLoggedIn) {
-    return <Redirect href="/signup" />;
+    return <Redirect href="/login" />;
   }
   return <Redirect href="/(tabs)" />;
 }

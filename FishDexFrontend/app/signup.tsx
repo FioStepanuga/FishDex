@@ -24,7 +24,7 @@ export default function SignUpScreen() {
       if (response.ok) {
         Alert.alert("Success", "Signed up to FishDex!");
         setIsLoggedIn(true);
-        router.replace('/');
+        router.replace('/login');
       } else {
         Alert.alert("Error", result.message || "Invalid Username or Password");
       }

@@ -7,7 +7,7 @@ import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-nat
 
 
 export default function AccountScreen() {
-  const { username, setIsLoggedIn, setUsername } = useAuth();
+  const { username, setIsLoggedIn, setUsername, token, setToken } = useAuth();
   const router = useRouter();
   const { theme, isDark, toggleTheme} = useTheme();
 
@@ -19,11 +19,23 @@ export default function AccountScreen() {
   };
 
   const handleSignOut = async () => {
-    setIsLoggedIn(false);
-    setUsername('');
-    // AsyncStorage is cleared automatically via the wrapped functions above
-    router.replace('/signup');
-  };
+  try {
+    // tell the server to invalidate the token
+    await fetch('http://10.0.2.2:5177/api/Logout', {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(token)  // send the token to delete
+    });
+  } catch (error) {
+    console.log('Logout error:', error);
+  }
+
+  // clear local storage regardless of server response
+  setIsLoggedIn(false);
+  setUsername('');
+  setToken('');
+  router.replace('/login');
+};
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
