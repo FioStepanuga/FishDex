@@ -3,6 +3,7 @@ using Npgsql;
 using System.Diagnostics;
 using BCrypt.Net;
 
+
 namespace FishDex
 {
     public class Users
@@ -88,9 +89,9 @@ namespace FishDex
 
         //---------------------------------------------------------------------------------------------------------------------------------------
 
-        public bool GetUser(string username, string enteredPassword)
+        public string? GetUser(string username, string enteredPassword)
         {
-            string sql = "SELECT \"password\" FROM users WHERE username = @username;";
+            string sql = "SELECT \"password\" FROM users WHERE username = @username;"; // find the password that is paired with the username
 
             using (var conn = new NpgsqlConnection(_connectionString))
             {
@@ -107,19 +108,19 @@ namespace FishDex
 
                             // eventually check hash here
 
-                            if (BCrypt.Net.BCrypt.Verify(enteredPassword, storedHash))
+                            if (BCrypt.Net.BCrypt.Verify(enteredPassword, storedHash)) //if the password hashes match then the login is successful
                             {
                                 Console.WriteLine("Login Successful!");
-                                return true;
+                                return username.Trim().ToLower();
                             }
                         }
                     }
                 }
             }
             Console.WriteLine("Invalid username or password.");
-            return false;
+            return null;
         }
-
+        
         //---------------------------------------------------------------------------------------------------------------------------------------
 
 
@@ -148,8 +149,65 @@ namespace FishDex
             }
         }
 
+        //---------------------------------------------------------------------------------------------------------------------------------------
 
 
+        public void SaveToken(string username, string token)
+        {
+            string sql = @"INSERT INTO tokens (user_id, token, expires_at) 
+                   SELECT user_id, @token, @expiresAt 
+                   FROM users WHERE username = @username";
+
+            using (var conn = new NpgsqlConnection(_connectionString))
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("username", username);
+                    cmd.Parameters.AddWithValue("token", token);
+                    cmd.Parameters.AddWithValue("expiresAt", DateTime.UtcNow.AddDays(7));
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        //---------------------------------------------------------------------------------------------------------------------------------------
+
+        public bool IsTokenValid(string token)
+        {
+            string sql = @"SELECT COUNT(*) FROM tokens 
+                   WHERE token = @token 
+                   AND expires_at > CURRENT_TIMESTAMP";
+
+            using (var conn = new NpgsqlConnection(_connectionString))
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("token", token);
+                    return (long)cmd.ExecuteScalar() > 0;
+                }
+            }
+        }
+
+        //---------------------------------------------------------------------------------------------------------------------------------------
+
+        public void DeleteToken(string token)
+        {
+            string sql = "DELETE FROM tokens WHERE token = @token";
+
+            using (var conn = new NpgsqlConnection(_connectionString))
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("token", token);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        //---------------------------------------------------------------------------------------------------------------------------------------
 
 
     }

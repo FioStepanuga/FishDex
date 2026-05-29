@@ -1,3 +1,6 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 namespace FishDex
 {
@@ -12,7 +15,7 @@ namespace FishDex
             var userManager = new Users(connectionString);
             var logManager = new Logs(connectionString);
 
-            logManager.GetUserLogs(10);
+            //logManager.GetUserLogs(10);
 
             //userManager.InsertUser("jdoewife", "password321");
             //userManager.DeleteUser(8);
@@ -23,9 +26,26 @@ namespace FishDex
 
 
 
-
+            //--------------------------------------------------------------------------------------------------------------------------
+            //Use JWT authentication. Check if the token was signed with the secret JWT key.
 
             var builder = WebApplication.CreateBuilder(args);
+
+            var jwtKey = builder.Configuration["JwtKey"];
+            builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+                .AddJwtBearer(options =>
+                {
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuerSigningKey = true,
+                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+                        ValidateIssuer = false,   //in production I need to make sure this is the servers URL
+                        ValidateAudience = false //in production I need to make sure this is the app URL
+                    };
+                });
+
+
+
 
             builder.WebHost.ConfigureKestrel(options =>
             {
@@ -46,14 +66,13 @@ namespace FishDex
                 app.MapOpenApi();
             }
 
-            //app.UseHttpsRedirection();
-
-            //app.UseAuthorization();
-
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.MapControllers();
 
             app.Run();
+
 
 
         }
