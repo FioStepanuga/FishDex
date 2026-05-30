@@ -30,6 +30,9 @@ namespace FishDex.Controllers
                 return Unauthorized(new { message = "Invalid username or password" });
             }
 
+            var userId = userManager.GetUserId(username);
+
+
             // Generate JWT token
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.UTF8.GetBytes(_jwtKey);
@@ -38,7 +41,9 @@ namespace FishDex.Controllers
             {
                 Subject = new ClaimsIdentity(new[]
                 {
-                    new Claim(ClaimTypes.Name, username)  // store username inside token
+                    new Claim(ClaimTypes.Name, username),  // store username inside token
+                    new Claim("userId", userId.ToString())  // store user_id in token
+
                 }),
                 Expires = DateTime.UtcNow.AddDays(7),    // token lasts 7 days
                 SigningCredentials = new SigningCredentials(

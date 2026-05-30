@@ -120,9 +120,28 @@ namespace FishDex
             Console.WriteLine("Invalid username or password.");
             return null;
         }
-        
+
         //---------------------------------------------------------------------------------------------------------------------------------------
 
+        public int GetUserId(string username)
+        {
+            string sql = "SELECT user_id FROM users WHERE username = @username;";
+
+            using (var conn = new NpgsqlConnection(_connectionString))
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("username", username.Trim().ToLower());
+
+                    var result = cmd.ExecuteScalar();
+                    return result != null ? (int)result : -1; // returns -1 if user not found
+                }
+            }
+        }
+
+
+        //---------------------------------------------------------------------------------------------------------------------------------------
 
         public void UpdatePassword(int id, string newPassword)
         {
