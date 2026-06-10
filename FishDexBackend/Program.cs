@@ -10,7 +10,6 @@ namespace FishDex
 
         {
 
-
             string connectionString = "Host=localhost;Port=5432;Username=postgres;Password=FioTennisPro7002!;Database=fishdex";
             var userManager = new Users(connectionString);
             var logManager = new Logs(connectionString);

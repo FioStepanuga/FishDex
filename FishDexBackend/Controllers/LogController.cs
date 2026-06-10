@@ -51,5 +51,24 @@ namespace FishDex.Controllers
 
             return Ok(new { message = "Log added successfully" });
         }
+
+        // DELETE api/Log/5
+        [HttpDelete("{logId}")]
+        public IActionResult Delete(int logId)
+        {
+            var userIdClaim = User.FindFirst("userId")?.Value;
+
+            if (userIdClaim == null)
+            {
+                return Unauthorized(new { message = "Invalid token" });
+            }
+
+            int userId = int.Parse(userIdClaim);
+
+            var logManager = new Logs(_connectionString);
+            logManager.DeleteLog(logId, userId);
+
+            return Ok(new { message = "Log deleted successfully" });
+        }
     }
 }

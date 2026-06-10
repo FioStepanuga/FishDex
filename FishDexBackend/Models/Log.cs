@@ -2,6 +2,7 @@
 {
     public class Log
     {
+        public int LogId { get; set; }
         public string Species { get; set; }
         public decimal Weight { get; set; }
         public decimal Length { get; set; }

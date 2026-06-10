@@ -1,3 +1,4 @@
+import { API_URL } from '@/constants/api';
 import { useAuth } from '@/context/auth';
 import { useTheme } from '@/context/theme';
 import { Ionicons } from '@expo/vector-icons';
@@ -21,7 +22,7 @@ export default function AccountScreen() {
   const handleSignOut = async () => {
   try {
     // tell the server to invalidate the token
-    await fetch('http://10.0.2.2:5177/api/Logout', {
+    await fetch(`${API_URL}/api/Logout`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(token)  // send the token to delete

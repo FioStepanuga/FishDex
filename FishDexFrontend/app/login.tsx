@@ -1,3 +1,4 @@
+import { API_URL } from '@/constants/api';
 import { useAuth } from '@/context/auth';
 import { useTheme } from '@/context/theme';
 import { useRouter } from 'expo-router';
@@ -13,7 +14,7 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch('http://10.0.2.2:5177/api/Login', {
+      const response = await fetch(`${API_URL}/api/Login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ UserName: username, Password: password })

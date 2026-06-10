@@ -1,3 +1,4 @@
+import { API_URL } from '@/constants/api';
 import { useAuth } from '@/context/auth';
 import { useRouter } from 'expo-router';
 import React from 'react';
@@ -10,7 +11,7 @@ export default function SignUpScreen() {
   const handleSignUp = async () => {
     try {
 
-      const response = await fetch('http://10.0.2.2:5177/api/SignUp', {
+      const response = await fetch(`${API_URL}/api/SignUp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

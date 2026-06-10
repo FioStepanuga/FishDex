@@ -1,19 +1,23 @@
+import { API_URL } from '@/constants/api';
 import { useAuth } from '@/context/auth';
 import { useTheme } from '@/context/theme';
+import { Ionicons } from '@expo/vector-icons';
 import { useEffect, useState } from 'react';
 import {
-    Alert,
-    FlatList,
-    Modal,
-    Pressable,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
+  Alert,
+  FlatList,
+  Modal,
+  Pressable,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  View,
 } from 'react-native';
 
+
 type Log = {
+    logId: number;
   species: string;
   weight: number;
   length: number;
@@ -42,7 +46,7 @@ export default function LogScreen() {
 
   const fetchLogs = async () => {
     try {
-      const response = await fetch('http://10.0.2.2:5177/api/Log', {
+      const response = await fetch(`${API_URL}/api/Log`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -69,7 +73,7 @@ export default function LogScreen() {
     }
 
     try {
-      const response = await fetch('http://10.0.2.2:5177/api/Log', {
+      const response = await fetch(`${API_URL}/api/Log`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -103,6 +107,40 @@ export default function LogScreen() {
     }
   };
 
+  const handleDeleteLog = async (logId: number) => {
+  Alert.alert(
+    'Delete Log',
+    'Are you sure you want to delete this log?',
+    [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: async () => {
+          try {
+            const response = await fetch(`${API_URL}/api/Log/${logId}`, {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${token}`
+              }
+            });
+
+            if (response.ok) {
+              fetchLogs();  // refresh the list
+            } else {
+              Alert.alert('Error', 'Failed to delete log');
+            }
+          } catch (error) {
+            Alert.alert('Error', String(error));
+          }
+        }
+      }
+    ]
+    );
+    };
+
+  
+
   const renderLog = ({ item }: { item: Log }) => (
     <View style={[styles.logCard, { backgroundColor: theme.card, borderColor: theme.border }]}>
       <View style={styles.logHeader}>
@@ -111,6 +149,9 @@ export default function LogScreen() {
           {new Date(item.caughtAt).toLocaleDateString()}
         </Text>
       </View>
+        <Pressable onPress={() => handleDeleteLog(item.logId)} style={styles.deleteButton}>
+          <Ionicons name="trash-outline" size={20} color="#ff3b30" />
+        </Pressable>
       <View style={styles.logDetails}>
         <Text style={[styles.detail, { color: theme.subtext }]}>⚖️ {item.weight} lbs</Text>
         <Text style={[styles.detail, { color: theme.subtext }]}>📏 {item.length} in</Text>
@@ -233,4 +274,6 @@ const styles = StyleSheet.create({
   submitButtonText: { color: '#fff', fontSize: 16, fontWeight: 'bold' },
   cancelButton:     { padding: 15, borderRadius: 10, alignItems: 'center', borderWidth: 1 },
   cancelButtonText: { fontSize: 16 },
+  logHeaderRight: { flexDirection: 'row', alignItems: 'center', gap: 10 },
+  deleteButton:   { padding: 4 },
 });

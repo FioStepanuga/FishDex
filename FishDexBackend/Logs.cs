@@ -15,7 +15,7 @@ namespace FishDex
         public List<Log> GetUserLogs(int userId)
         {
             string sql = @"
-                SELECT l.species, l.weight, l.length, l.location, l.description, l.caught_at 
+                SELECT l.log_id, l.species, l.weight, l.length, l.location, l.description, l.caught_at 
                 FROM logs l
                 JOIN users u ON l.user_id = u.user_id
                 WHERE u.user_id = @id
@@ -35,12 +35,13 @@ namespace FishDex
                         {
                             logs.Add(new Log
                             {
-                                Species = reader.GetString(0),
-                                Weight = reader.GetDecimal(1),
-                                Length = reader.GetDecimal(2),
-                                Location = reader.GetString(3),
-                                Description = reader.IsDBNull(4) ? "No description" : reader.GetString(4),
-                                CaughtAt = reader.GetDateTime(5)
+                                LogId = reader.GetInt32(0),
+                                Species = reader.GetString(1),
+                                Weight = reader.GetDecimal(2),
+                                Length = reader.GetDecimal(3),
+                                Location = reader.GetString(4),
+                                Description = reader.IsDBNull(5) ? "No description" : reader.GetString(5),
+                                CaughtAt = reader.GetDateTime(6)
                             });
                         }
                     }
@@ -69,6 +70,27 @@ namespace FishDex
                     cmd.Parameters.AddWithValue("location", log.Location);
                     cmd.Parameters.AddWithValue("description", log.Description ?? "");
                     cmd.Parameters.AddWithValue("caughtAt", log.CaughtAt);
+                    cmd.ExecuteNonQuery();
+                }
+            }
+        }
+
+        
+        //-------------------------------------------------------------------------------------------------------------------------------------------
+        
+
+        public void DeleteLog(int logId, int userId)
+        {
+            // userId check makes sure users can only delete their OWN logs
+            string sql = "DELETE FROM logs WHERE log_id = @logId AND user_id = @userId;";
+
+            using (var conn = new NpgsqlConnection(_connectionString))
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("logId", logId);
+                    cmd.Parameters.AddWithValue("userId", userId);
                     cmd.ExecuteNonQuery();
                 }
             }
