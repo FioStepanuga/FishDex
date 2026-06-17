@@ -680,6 +680,9 @@ FodyWeavers.xsd
 # JetBrains Rider
 *.sln.iml
 
+# Allow GeoJSON assets
+!assets/*.geojson
+
 ### VisualStudio Patch ###
 # Additional files built by Visual Studio
 

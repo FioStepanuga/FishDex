@@ -2,6 +2,7 @@ import { API_URL } from '@/constants/api';
 import { useAuth } from '@/context/auth';
 import { useTheme } from '@/context/theme';
 import * as ImagePicker from 'expo-image-picker';
+import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { ActivityIndicator, Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native';
@@ -14,6 +15,15 @@ export default function IdentifyScreen() {
   const [mimeType, setMimeType] = useState<string>('image/jpeg');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<string | null>(null);
+  const [location, setLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+
+const getLocation = async () => {
+  const { status } = await Location.requestForegroundPermissionsAsync();
+  if (status !== 'granted') return null;
+
+  const loc = await Location.getCurrentPositionAsync({});
+  return { latitude: loc.coords.latitude, longitude: loc.coords.longitude };
+};
 
 const takePhoto = async () => {
   const permission = await ImagePicker.requestCameraPermissionsAsync();
@@ -23,7 +33,7 @@ const takePhoto = async () => {
   }
 
   const photo = await ImagePicker.launchCameraAsync({
-    mediaTypes: ['images'],  // ← updated
+    mediaTypes: ['images'],
     quality: 0.7,
     base64: true,
   });
@@ -32,7 +42,11 @@ const takePhoto = async () => {
     setImage(photo.assets[0].uri);
     setMimeType(photo.assets[0].mimeType ?? 'image/jpeg');
     setResult(null);
-    identifyFish(photo.assets[0].base64, photo.assets[0].mimeType ?? 'image/jpeg');
+
+    const loc = await getLocation(); 
+    setLocation(loc);
+
+    identifyFish(photo.assets[0].base64, photo.assets[0].mimeType ?? 'image/jpeg', loc);
   }
 };
 
@@ -54,41 +68,75 @@ const pickFromGallery = async () => {
     setImage(photo.assets[0].uri);
     setMimeType(photo.assets[0].mimeType ?? 'image/jpeg');
     setResult(null);
-    identifyFish(photo.assets[0].base64, photo.assets[0].mimeType ?? 'image/jpeg');
+
+    const loc = await getLocation();
+    setLocation(loc);
+
+    identifyFish(photo.assets[0].base64, photo.assets[0].mimeType ?? 'image/jpeg', loc);
   }
 };
 
-  const identifyFish = async (base64: string, mime: string) => {
-    setLoading(true);
-    try {
-      const response = await fetch(`${API_URL}/api/Identify`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          imageBase64: base64,
-          mimeType: mime
-        })
-      });
-
-      const data = await response.json();
-
-      Alert.alert('Debug', JSON.stringify(data)); //TEMPORARY
-
-      if (response.ok && data.success) {
-        setResult(data.species);
-      } else {
-        setResult(null);
-        Alert.alert('Could not identify', 'Try a clearer photo of the fish');
+const getLocationName = async (lat: number, lng: number): Promise<string> => {
+  try {
+    const results = await Location.reverseGeocodeAsync({ latitude: lat, longitude: lng });
+    
+    if (results.length > 0) {
+      const place = results[0];
+      // Combine city and region (state) if both exist
+      const city = place.city ?? '';
+      const region = place.region ?? '';
+      
+      if (city && region) {
+        return `${city}, ${region}`;
+      } else if (city) {
+        return city;
+      } else if (region) {
+        return region;
       }
-    } catch (error) {
-      Alert.alert('Error', String(error));
-    } finally {
-      setLoading(false);
     }
-  };
+  } catch (error) {
+    console.log('Reverse geocode error:', error);
+  }
+  
+  return '';  // fallback if nothing found
+};
+
+
+const identifyFish = async (
+  base64: string,
+  mime: string,
+  loc: { latitude: number; longitude: number } | null
+) => {
+  setLoading(true);
+  try {
+    const response = await fetch(`${API_URL}/api/Identify`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        imageBase64: base64,
+        mimeType: mime,
+        latitude: loc?.latitude ?? null,
+        longitude: loc?.longitude ?? null
+      })
+    });
+
+    const data = await response.json();
+
+    if (response.ok && data.success) {
+      setResult(data.species);
+    } else {
+      setResult(null);
+      Alert.alert('Could not identify', 'Try a clearer photo of the fish');
+    }
+  } catch (error) {
+    Alert.alert('Error', String(error));
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -122,12 +170,32 @@ const pickFromGallery = async () => {
           <Text style={[styles.resultSpecies, { color: theme.text }]}>{result}</Text>
           <Pressable
             style={styles.logButton}
-            onPress={() => router.push({ pathname: '/log', params: { species: result } })}
-          >
-            <Text style={styles.logButtonText}>Log this catch</Text>
-          </Pressable>
-        </View>
-      )}
+            onPress={async () => {
+              let locationName = '';
+              if (location) {
+                locationName = await getLocationName(location.latitude, location.longitude);
+              }
+
+              router.push({
+                pathname: '/(tabs)/log',
+                params: {
+                  species: result,
+                  location: locationName,
+                  caughtAt: new Date().toISOString(),
+                  photoBase64: image ? await fetch(image).then(r => r.blob()).then(b => new Promise<string>((res) => {
+                    const reader = new FileReader();
+                    reader.onload = () => res((reader.result as string).split(',')[1]);
+                    reader.readAsDataURL(b);
+                  })) : null,
+                  photoMime: mimeType
+                }
+              });
+            }}
+    >
+      <Text style={styles.logButtonText}>Log this catch</Text>
+    </Pressable>
+  </View>
+)}
 
       {/* Buttons */}
       <View style={styles.buttonRow}>

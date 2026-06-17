@@ -1,3 +1,4 @@
+import regionsData from '@/assets/FWS_National_Regional_Boundaries.json';
 import { API_URL } from '@/constants/api';
 import { useAuth } from '@/context/auth';
 import { useTheme } from '@/context/theme';
@@ -15,107 +16,46 @@ import {
 } from 'react-native';
 import MapView, { Marker, Polygon } from 'react-native-maps';
 
-// USFWS Region boundaries (simplified polygons)
-const USFWS_REGIONS = [
-  {
-    id: 1,
-    name: 'Northeast',
-    color: '#FF6B6B',
-    coordinates: [
-      { latitude: 47.5, longitude: -76.5 },
-      { latitude: 47.5, longitude: -66.9 },
-      { latitude: 40.5, longitude: -66.9 },
-      { latitude: 38.9, longitude: -74.9 },
-      { latitude: 40.5, longitude: -76.5 },
-    ],
-  },
-  {
-    id: 2,
-    name: 'Southeast',
-    color: '#4ECDC4',
-    coordinates: [
-      { latitude: 40.5, longitude: -84.8 },
-      { latitude: 40.5, longitude: -75.0 },
-      { latitude: 38.9, longitude: -75.0 },
-      { latitude: 24.5, longitude: -75.0 },
-      { latitude: 24.5, longitude: -97.0 },
-      { latitude: 29.5, longitude: -97.0 },
-      { latitude: 36.5, longitude: -84.8 },
-    ],
-  },
-  {
-    id: 3,
-    name: 'Midwest',
-    color: '#45B7D1',
-    coordinates: [
-      { latitude: 49.0, longitude: -97.0 },
-      { latitude: 49.0, longitude: -82.0 },
-      { latitude: 40.5, longitude: -82.0 },
-      { latitude: 40.5, longitude: -84.8 },
-      { latitude: 36.5, longitude: -84.8 },
-      { latitude: 36.5, longitude: -97.0 },
-    ],
-  },
-  {
-    id: 4,
-    name: 'Southwest',
-    color: '#96CEB4',
-    coordinates: [
-      { latitude: 37.0, longitude: -114.0 },
-      { latitude: 37.0, longitude: -97.0 },
-      { latitude: 29.5, longitude: -97.0 },
-      { latitude: 25.8, longitude: -97.0 },
-      { latitude: 25.8, longitude: -114.0 },
-    ],
-  },
-  {
-    id: 5,
-    name: 'Mountain-Prairie',
-    color: '#FFEAA7',
-    coordinates: [
-      { latitude: 49.0, longitude: -111.0 },
-      { latitude: 49.0, longitude: -97.0 },
-      { latitude: 36.5, longitude: -97.0 },
-      { latitude: 37.0, longitude: -111.0 },
-    ],
-  },
-  {
-    id: 6,
-    name: 'Pacific',
-    color: '#DDA0DD',
-    coordinates: [
-      { latitude: 49.0, longitude: -124.5 },
-      { latitude: 49.0, longitude: -111.0 },
-      { latitude: 37.0, longitude: -111.0 },
-      { latitude: 32.5, longitude: -114.0 },
-      { latitude: 32.5, longitude: -117.1 },
-      { latitude: 38.0, longitude: -122.5 },
-      { latitude: 46.2, longitude: -124.5 },
-    ],
-  },
-  {
-    id: 7,
-    name: 'Alaska',
-    color: '#98D8C8',
-    coordinates: [
-      { latitude: 71.5, longitude: -141.0 },
-      { latitude: 71.5, longitude: -168.0 },
-      { latitude: 54.5, longitude: -168.0 },
-      { latitude: 54.5, longitude: -141.0 },
-    ],
-  },
-  {
-    id: 8,
-    name: 'Pacific Southwest',
-    color: '#F7DC6F',
-    coordinates: [
-      { latitude: 37.0, longitude: -114.0 },
-      { latitude: 37.0, longitude: -117.1 },
-      { latitude: 32.5, longitude: -117.1 },
-      { latitude: 32.5, longitude: -114.0 },
-    ],
-  },
-];
+// Region colors mapped by region number
+const REGION_COLORS: { [key: number]: string } = {
+  1: '#FF6B6B',
+  2: '#4ECDC4',
+  3: '#45B7D1',
+  4: '#96CEB4',
+  5: '#FFEAA7',
+  6: '#DDA0DD',
+  7: '#98D8C8',
+  8: '#F7DC6F',
+};
+
+// Convert GeoJSON coordinates to react-native-maps format
+const convertCoordinates = (coords: number[][]) => {
+  return coords.map(coord => ({
+    latitude: coord[1],
+    longitude: coord[0]
+  }));
+};
+
+// Build regions array from GeoJSON
+const USFWS_REGIONS = (regionsData as any).features.map((feature: any) => {
+  const regionId = feature.properties.Region_Number;
+  const polygons: { latitude: number; longitude: number }[][] = [];
+
+  if (feature.geometry.type === 'Polygon') {
+    polygons.push(convertCoordinates(feature.geometry.coordinates[0]));
+  } else if (feature.geometry.type === 'MultiPolygon') {
+    feature.geometry.coordinates.forEach((polygon: number[][][]) => {
+      polygons.push(convertCoordinates(polygon[0]));
+    });
+  }
+
+  return {
+    id: regionId,
+    name: feature.properties.REGNAME,
+    color: REGION_COLORS[regionId] ?? '#007AFF',
+    polygons  // ← array of polygons since regions can have multiple shapes
+  };
+});
 
 type FishEntry = {
   fishId: number;
@@ -181,20 +121,28 @@ export default function ExploreScreen() {
   };
 
   const findRegionForLocation = (lat: number, lng: number) => {
-    return USFWS_REGIONS.find(region =>
-      pointInPolygon(lat, lng, region.coordinates)
-    ) || null;
-  };
+  return USFWS_REGIONS.find((region: any) =>
+    region.polygons.some((polygon: any) =>
+      pointInPolygon(lat, lng, polygon)
+    )
+  ) || null;
+};
+
 
   const handleRegionPress = async (region: typeof USFWS_REGIONS[0]) => {
     setSelectedRegion(region);
     setModalVisible(true);
     setLoading(true);
 
+    console.log('Fetching:', `${API_URL}/api/Explore/region/${region.id}`);
+    console.log('Token:', token?.substring(0, 20));
+
     try {
       const response = await fetch(`${API_URL}/api/Explore/region/${region.id}`, {
         headers: { 'Authorization': `Bearer ${token}` }
       });
+
+      console.log('Response status:', response.status);
 
       if (response.ok) {
         const data = await response.json();
@@ -241,21 +189,23 @@ export default function ExploreScreen() {
         }}
       >
         {/* Draw region polygons */}
-        {USFWS_REGIONS.map(region => (
-          <Polygon
-            key={region.id}
-            coordinates={region.coordinates}
-            fillColor={
-              activeRegionId === region.id
-                ? `${region.color}99`  // ← more opaque when active
-                : `${region.color}44`  // ← semi transparent normally
-            }
-            strokeColor={region.color}
-            strokeWidth={2}
-            tappable={true}
-            onPress={() => handleRegionPress(region)}
-          />
-        ))}
+        {USFWS_REGIONS.map((region: any) =>
+          region.polygons.map((polygonCoords: any, index: number) => (
+            <Polygon
+              key={`${region.id}-${index}`}
+              coordinates={polygonCoords}
+              fillColor={
+                activeRegionId === region.id
+                  ? `${region.color}99`
+                  : `${region.color}44`
+              }
+              strokeColor={region.color}
+              strokeWidth={2}
+              tappable={true}
+              onPress={() => handleRegionPress(region)}
+            />
+          ))
+        )}
 
         {/* User location marker */}
         {userLocation && (
@@ -271,7 +221,7 @@ export default function ExploreScreen() {
       {activeRegionId && (
         <View style={[styles.regionLabel, { backgroundColor: theme.card }]}>
           <Text style={[styles.regionLabelText, { color: theme.text }]}>
-            📍 You are in the {USFWS_REGIONS.find(r => r.id === activeRegionId)?.name} region
+            📍 You are in the {USFWS_REGIONS.find((r: any) => r.id === activeRegionId)?.name} region
           </Text>
         </View>
       )}

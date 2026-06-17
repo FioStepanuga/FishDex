@@ -27,9 +27,17 @@ namespace FishDex.Controllers
             var speciesList = fishManager.GetAllSpecies();
             var speciesFormatted = string.Join(", ", speciesList);
 
+            string locationHint = "";
+            if (request.Latitude.HasValue && request.Longitude.HasValue)
+            {
+                locationHint = $"The photo was taken near latitude {request.Latitude}, longitude {request.Longitude}. Use this as a hint for which species are likely in this area, but still rely primarily on the visual appearance.";
+            }
+
+
             var prompt = $@"You are a fish identification expert. 
                 You must identify the fish in this image.
                 You MUST choose from ONLY this exact list: {speciesFormatted}.
+                {locationHint}
                 Rules:
                 - Reply with ONLY the exact species name from the list, no other words
                 - Do not explain your answer

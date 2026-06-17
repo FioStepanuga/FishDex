@@ -130,5 +130,69 @@ namespace FishDex
             return fishList;
         }
 
+        //-------------------------------------------------------------------------------------------------------------------------------
+
+        public object GetUserProgress(int userId)
+        {
+            string sql = @"
+        SELECT 
+            (SELECT COUNT(*) FROM fish) as total,
+            (SELECT COUNT(*) FROM caught_fish WHERE user_id = @userId) as caught";
+
+            using (var conn = new NpgsqlConnection(_connectionString))
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("userId", userId);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return new
+                            {
+                                total = reader.GetInt64(0),
+                                caught = reader.GetInt64(1)
+                            };
+                        }
+                    }
+                }
+            }
+            return new { total = 0, caught = 0 };
+        }
+
+        public object GetRegionProgress(int userId, int regionId)
+        {
+            string sql = @"
+        SELECT 
+            (SELECT COUNT(*) FROM fish_regions WHERE region_id = @regionId) as total,
+            (SELECT COUNT(*) FROM caught_fish cf
+             JOIN fish_regions fr ON cf.fish_id = fr.fish_id
+             WHERE cf.user_id = @userId AND fr.region_id = @regionId) as caught";
+
+            using (var conn = new NpgsqlConnection(_connectionString))
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("userId", userId);
+                    cmd.Parameters.AddWithValue("regionId", regionId);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return new
+                            {
+                                total = reader.GetInt64(0),
+                                caught = reader.GetInt64(1)
+                            };
+                        }
+                    }
+                }
+            }
+            return new { total = 0, caught = 0 };
+        }
+
+
     }
 }

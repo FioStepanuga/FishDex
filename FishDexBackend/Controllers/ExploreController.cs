@@ -37,5 +37,31 @@ namespace FishDex.Controllers
 
             return Ok(result);
         }
+
+        // GET api/Explore/progress — overall caught vs total
+        [HttpGet("progress")]
+        public IActionResult GetProgress()
+        {
+            var userIdClaim = User.FindFirst("userId")?.Value;
+            if (userIdClaim == null) return Unauthorized();
+            int userId = int.Parse(userIdClaim);
+
+            var fishManager = new Fish(_connectionString);
+            var progress = fishManager.GetUserProgress(userId);
+            return Ok(progress);
+        }
+
+        // GET api/Explore/progress/region/{regionId} — caught vs total per region
+        [HttpGet("progress/region/{regionId}")]
+        public IActionResult GetRegionProgress(int regionId)
+        {
+            var userIdClaim = User.FindFirst("userId")?.Value;
+            if (userIdClaim == null) return Unauthorized();
+            int userId = int.Parse(userIdClaim);
+
+            var fishManager = new Fish(_connectionString);
+            var progress = fishManager.GetRegionProgress(userId, regionId);
+            return Ok(progress);
+        }
     }
 }
