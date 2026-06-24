@@ -6,7 +6,7 @@ import * as ImagePicker from 'expo-image-picker';
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
-  Alert,
+  ActivityIndicator, Alert,
   FlatList,
   Image,
   Modal,
@@ -39,6 +39,7 @@ export default function LogScreen() {
   const [editingLog, setEditingLog] = useState<Log | null>(null);  // ← null = adding, Log = editing
 
   // Form state
+  const [loadingLogs, setLoadingLogs] = useState(true);  // ← add this
   const [species, setSpecies] = useState('');
   const [weight, setWeight] = useState('');
   const [length, setLength] = useState('');
@@ -67,6 +68,7 @@ export default function LogScreen() {
   }, [params.species]);
 
   const fetchLogs = async () => {
+    setLoadingLogs(true);
     try {
       const response = await fetch(`${API_URL}/api/Log`, {
         headers: {
@@ -80,6 +82,8 @@ export default function LogScreen() {
       }
     } catch (error) {
       Alert.alert('Error', String(error));
+    } finally {
+    setLoadingLogs(false);  
     }
   };
 
@@ -266,18 +270,21 @@ export default function LogScreen() {
         <Text style={styles.addButtonText}>+ Add Log</Text>
       </Pressable>
 
-      {/* Log List */}
-      <FlatList
-        data={logs}
-        keyExtractor={(_, index) => index.toString()}
-        renderItem={renderLog}
-        contentContainerStyle={styles.list}
-        ListEmptyComponent={
-          <Text style={[styles.emptyText, { color: theme.subtext }]}>
-            No logs yet. Catch something!
-          </Text>
-        }
-      />
+      {loadingLogs ? (
+      <ActivityIndicator size="large" color="#007AFF" style={{ marginTop: 40 }} />
+      ) : (
+        <FlatList
+          data={logs}
+          keyExtractor={(_, index) => index.toString()}
+          renderItem={renderLog}
+          contentContainerStyle={styles.list}
+          ListEmptyComponent={
+            <Text style={[styles.emptyText, { color: theme.subtext }]}>
+              No logs yet. Catch something!
+            </Text>
+          }
+        />
+      )}
 
       {/* Add/Edit Modal */}
       <Modal

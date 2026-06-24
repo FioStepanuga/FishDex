@@ -28,6 +28,7 @@ const REGION_COLORS: { [key: number]: string } = {
   8: '#F7DC6F',
 };
 
+
 // Convert GeoJSON coordinates to react-native-maps format
 const convertCoordinates = (coords: number[][]) => {
   return coords.map(coord => ({
@@ -76,10 +77,14 @@ export default function ExploreScreen() {
   const [regionFish, setRegionFish] = useState<FishEntry[]>([]);
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [locationLoading, setLocationLoading] = useState(true);
+
 
   // Get user location on load
-  useEffect(() => {
-    const getLocation = async () => {
+useEffect(() => {
+  const getLocation = async () => {
+    setLocationLoading(true);
+    try {
       const { status } = await Location.requestForegroundPermissionsAsync();
       if (status !== 'granted') {
         Alert.alert('Permission denied', 'Location access is needed to show your region');
@@ -90,24 +95,26 @@ export default function ExploreScreen() {
       const { latitude, longitude } = location.coords;
       setUserLocation({ latitude, longitude });
 
-      // Auto-highlight the region the user is in
       const userRegion = findRegionForLocation(latitude, longitude);
       if (userRegion) {
         setActiveRegionId(userRegion.id);
       }
 
-      // Pan map to user location
       mapRef.current?.animateToRegion({
         latitude,
         longitude,
         latitudeDelta: 20,
         longitudeDelta: 20,
       });
-    };
+    } catch (error) {
+      console.log('Location error:', error);
+    } finally {
+      setLocationLoading(false);  // ← always runs regardless of success or failure
+    }
+  };
 
-    getLocation();
-  }, []);
-
+  getLocation();
+}, []);
   // Simple point-in-polygon check
   const pointInPolygon = (lat: number, lng: number, polygon: { latitude: number; longitude: number }[]) => {
     let inside = false;
@@ -188,7 +195,13 @@ export default function ExploreScreen() {
           longitudeDelta: 60,
         }}
       >
-        {/* Draw region polygons */}
+
+      {locationLoading && (
+      <View style={styles.locationLoadingOverlay}>
+        <ActivityIndicator size="large" color="#007AFF" />
+      </View>
+      )}
+          {/* Draw region polygons */}
         {USFWS_REGIONS.map((region: any) =>
           region.polygons.map((polygonCoords: any, index: number) => (
             <Polygon
@@ -283,4 +296,6 @@ const styles = StyleSheet.create({
   caughtBadge:     { fontSize: 12, color: '#4CAF50', fontWeight: '600' },
   fishHabitat:     { fontSize: 12, marginBottom: 4 },
   fishDescription: { fontSize: 13 },
+  locationLoadingOverlay: { position: 'absolute', top: '50%', left: '50%', marginLeft: -20, marginTop: -20 },
+
 });
