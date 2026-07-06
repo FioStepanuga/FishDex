@@ -37,13 +37,12 @@ namespace FishDex
                             {
                                 LogId = reader.GetInt32(0),
                                 Species = reader.GetString(1),
-                                Weight = reader.GetDecimal(2),
-                                Length = reader.GetDecimal(3),
+                                Weight = reader.IsDBNull(2) ? null : reader.GetDecimal(2),
+                                Length = reader.IsDBNull(3) ? null : reader.GetDecimal(3),  
                                 Location = reader.GetString(4),
                                 Description = reader.IsDBNull(5) ? "No description" : reader.GetString(5),
                                 CaughtAt = reader.GetDateTime(6),
                                 PhotoBase64 = reader.IsDBNull(7) ? null : reader.GetString(7)
-
                             });
                         }
                     }
@@ -67,8 +66,8 @@ namespace FishDex
                 {
                     cmd.Parameters.AddWithValue("userId", userId);
                     cmd.Parameters.AddWithValue("species", log.Species);
-                    cmd.Parameters.AddWithValue("weight", log.Weight);
-                    cmd.Parameters.AddWithValue("length", log.Length);
+                    cmd.Parameters.AddWithValue("weight", log.Weight.HasValue ? log.Weight.Value : DBNull.Value);
+                    cmd.Parameters.AddWithValue("length", log.Length.HasValue ? log.Length.Value : DBNull.Value);
                     cmd.Parameters.AddWithValue("location", log.Location);
                     cmd.Parameters.AddWithValue("description", log.Description ?? "");
                     cmd.Parameters.AddWithValue("caughtAt", log.CaughtAt);
@@ -117,8 +116,8 @@ namespace FishDex
                     cmd.Parameters.AddWithValue("logId", logId);
                     cmd.Parameters.AddWithValue("userId", userId);
                     cmd.Parameters.AddWithValue("species", log.Species);
-                    cmd.Parameters.AddWithValue("weight", log.Weight);
-                    cmd.Parameters.AddWithValue("length", log.Length);
+                    cmd.Parameters.AddWithValue("weight", log.Weight.HasValue ? log.Weight.Value : DBNull.Value);
+                    cmd.Parameters.AddWithValue("length", log.Length.HasValue ? log.Length.Value : DBNull.Value);
                     cmd.Parameters.AddWithValue("location", log.Location);
                     cmd.Parameters.AddWithValue("description", log.Description ?? "");
                     cmd.Parameters.AddWithValue("photoBase64", string.IsNullOrEmpty(log.PhotoBase64) ? DBNull.Value : log.PhotoBase64);

@@ -21,8 +21,8 @@ import {
 type Log = {
   logId: number;
   species: string;
-  weight: number;
-  length: number;
+  weight: number | null;    // ← nullable
+  length: number | null;    // ← nullable
   location: string;
   description: string;
   caughtAt: string;
@@ -103,56 +103,82 @@ export default function LogScreen() {
     // Pre-fill form with existing log data
     setEditingLog(log);
     setSpecies(log.species);
-    setWeight(log.weight.toString());
-    setLength(log.length.toString());
+    setWeight(log.weight?.toString() ?? '');
+    setLength(log.length?.toString() ?? '');
     setLocation(log.location);
     setDescription(log.description === 'No description' ? '' : log.description);
     setPhotoBase64(log.photoBase64);
     setModalVisible(true);
   };
 
-  const handleSaveLog = async () => {
-    if (!species || !weight || !length || !location) {
-      Alert.alert('Error', 'Please fill in all required fields');
-      return;
+const handleSaveLog = async () => {
+  // Validation errors object
+  const errors: { [key: string]: string } = {};
+
+  // Required fields
+  if (!species.trim()) {
+    errors.species = 'Species is required';
+  }
+  if (!location.trim()) {
+    errors.location = 'Location is required';
+  }
+
+  // Optional but validated if provided
+  if (weight !== '') {
+    const weightNum = parseFloat(weight);
+    if (isNaN(weightNum) || weightNum <= 0) {
+      errors.weight = 'Weight must be a positive number';
     }
-
-    const logData = {
-      species,
-      weight: parseFloat(weight),
-      length: parseFloat(length),
-      location,
-      description,
-      caughtAt: new Date().toISOString(),
-      photoBase64: photoBase64 ?? null
-    };
-
-    try {
-      const isEditing = editingLog !== null;
-      const url = isEditing
-        ? `${API_URL}/api/Log/${editingLog.logId}`  // ← PUT for edit
-        : `${API_URL}/api/Log`;                      // ← POST for new
-
-      const response = await fetch(url, {
-        method: isEditing ? 'PUT' : 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(logData)
-      });
-
-      if (response.ok) {
-        setModalVisible(false);
-        fetchLogs();
-        Alert.alert('Success', isEditing ? 'Log updated!' : 'Log added!');
-      } else {
-        Alert.alert('Error', isEditing ? 'Failed to update log' : 'Failed to add log');
-      }
-    } catch (error) {
-      Alert.alert('Error', String(error));
+  }
+  if (length !== '') {
+    const lengthNum = parseFloat(length);
+    if (isNaN(lengthNum) || lengthNum <= 0) {
+      errors.length = 'Length must be a positive number';
     }
+  }
+
+  // If any errors, show them and stop
+  if (Object.keys(errors).length > 0) {
+    Alert.alert('Please fix the following', Object.values(errors).join('\n'));
+    return;
+  }
+
+  const logData = {
+    species: species.trim(),
+    weight: weight !== '' ? parseFloat(weight) : null,    // ← null if empty
+    length: length !== '' ? parseFloat(length) : null,    // ← null if empty
+    location: location.trim(),
+    description: description.trim(),
+    caughtAt: new Date().toISOString(),
+    photoBase64: photoBase64 ?? null
   };
+
+  try {
+    const isEditing = editingLog !== null;
+    const url = isEditing
+      ? `${API_URL}/api/Log/${editingLog.logId}`
+      : `${API_URL}/api/Log`;
+
+    const response = await fetch(url, {
+      method: isEditing ? 'PUT' : 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(logData)
+    });
+
+    if (response.ok) {
+      setModalVisible(false);
+      fetchLogs();
+      Alert.alert('Success', isEditing ? 'Log updated!' : 'Log added!');
+    } else {
+      Alert.alert('Error', isEditing ? 'Failed to update log' : 'Failed to add log');
+    }
+  } catch (error) {
+    Alert.alert('Error', String(error));
+  }
+};
 
   const handleDeleteLog = async (logId: number) => {
     Alert.alert(
@@ -253,8 +279,12 @@ export default function LogScreen() {
       </View>
 
       <View style={styles.logDetails}>
-        <Text style={[styles.detail, { color: theme.subtext }]}>⚖️ {item.weight} lbs</Text>
-        <Text style={[styles.detail, { color: theme.subtext }]}>📏 {item.length} in</Text>
+        {item.weight !== null && (
+          <Text style={[styles.detail, { color: theme.subtext }]}>⚖️ {item.weight} lbs</Text>
+        )}
+        {item.length !== null && (
+          <Text style={[styles.detail, { color: theme.subtext }]}>📏 {item.length} in</Text>
+        )}
         <Text style={[styles.detail, { color: theme.subtext }]}>📍 {item.location}</Text>
       </View>
       {item.description && item.description !== 'No description' ? (
@@ -309,7 +339,7 @@ export default function LogScreen() {
             />
             <TextInput
               style={[styles.input, { backgroundColor: theme.background, borderColor: theme.border, color: theme.text }]}
-              placeholder="Weight (lbs) *"
+              placeholder="Weight in lbs (optional)"
               placeholderTextColor={theme.subtext}
               value={weight}
               onChangeText={setWeight}
@@ -317,7 +347,7 @@ export default function LogScreen() {
             />
             <TextInput
               style={[styles.input, { backgroundColor: theme.background, borderColor: theme.border, color: theme.text }]}
-              placeholder="Length (in) *"
+              placeholder="Length in inches (optional)"
               placeholderTextColor={theme.subtext}
               value={length}
               onChangeText={setLength}

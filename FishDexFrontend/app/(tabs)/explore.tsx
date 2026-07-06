@@ -10,6 +10,7 @@ import {
   FlatList,
   Modal,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   View,
@@ -78,6 +79,8 @@ export default function ExploreScreen() {
   const [modalVisible, setModalVisible] = useState(false);
   const [loading, setLoading] = useState(false);
   const [locationLoading, setLocationLoading] = useState(true);
+  const [selectedFish, setSelectedFish] = useState<FishEntry | null>(null);
+  const [fishDetailVisible, setFishDetailVisible] = useState(false);
 
 
   // Get user location on load
@@ -164,24 +167,33 @@ useEffect(() => {
     }
   };
 
-  const renderFishItem = ({ item }: { item: FishEntry }) => (
-    <View style={[
+const renderFishItem = ({ item }: { item: FishEntry }) => (
+  <Pressable
+    style={[
       styles.fishCard,
       {
         backgroundColor: item.isCaught ? '#e8f5e9' : theme.card,
         borderColor: item.isCaught ? '#4CAF50' : theme.border
       }
-    ]}>
-      <View style={styles.fishCardHeader}>
-        <Text style={[styles.fishName, { color: theme.text }]}>{item.fishName}</Text>
-        {item.isCaught && <Text style={styles.caughtBadge}>✓ Caught</Text>}
-      </View>
-      <Text style={[styles.fishHabitat, { color: theme.subtext }]}>{item.habitat}</Text>
-      <Text style={[styles.fishDescription, { color: theme.subtext }]} numberOfLines={2}>
-        {item.description}
-      </Text>
+    ]}
+    onPress={() => {
+      setModalVisible(false);       // ← close region modal first
+      setTimeout(() => {            // ← wait for it to close
+        setSelectedFish(item);
+        setFishDetailVisible(true); // ← then open fish detail
+      }, 400);
+    }}
+  >
+    <View style={styles.fishCardHeader}>
+      <Text style={[styles.fishName, { color: theme.text }]}>{item.fishName}</Text>
+      {item.isCaught && <Text style={styles.caughtBadge}>✓ Caught</Text>}
     </View>
-  );
+    <Text style={[styles.fishHabitat, { color: theme.subtext }]}>{item.habitat}</Text>
+    <Text style={[styles.fishDescription, { color: theme.subtext }]} numberOfLines={2}>
+      {item.description}
+    </Text>
+  </Pressable>
+);
 
   return (
     <View style={styles.container}>
@@ -195,13 +207,7 @@ useEffect(() => {
           longitudeDelta: 60,
         }}
       >
-
-      {locationLoading && (
-      <View style={styles.locationLoadingOverlay}>
-        <ActivityIndicator size="large" color="#007AFF" />
-      </View>
-      )}
-          {/* Draw region polygons */}
+        {/* Draw region polygons */}
         {USFWS_REGIONS.map((region: any) =>
           region.polygons.map((polygonCoords: any, index: number) => (
             <Polygon
@@ -229,6 +235,13 @@ useEffect(() => {
           />
         )}
       </MapView>
+
+      {/* ← moved outside MapView */}
+      {locationLoading && (
+        <View style={styles.locationLoadingOverlay}>
+          <ActivityIndicator size="large" color="#007AFF" />
+        </View>
+      )}
 
       {/* Region label overlay */}
       {activeRegionId && (
@@ -275,9 +288,57 @@ useEffect(() => {
           </View>
         </View>
       </Modal>
+
+      {/* Fish Detail Modal */}
+      <Modal
+        visible={fishDetailVisible}
+        animationType="slide"
+        transparent={true}
+        onRequestClose={() => setFishDetailVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <ScrollView style={[styles.modalContent, { backgroundColor: theme.card }]}>
+            <View style={styles.modalHeader}>
+              <Text style={[styles.modalTitle, { color: theme.text }]}>
+                {selectedFish?.fishName}
+              </Text>
+              <Pressable onPress={() => setFishDetailVisible(false)}>
+                <Text style={{ color: theme.subtext, fontSize: 16 }}>Close</Text>
+              </Pressable>
+            </View>
+
+            {/* Caught badge */}
+            {selectedFish?.isCaught && (
+              <View style={styles.caughtBadgeContainer}>
+                <Text style={styles.caughtBadgeText}>✓ Caught</Text>
+              </View>
+            )}
+
+            {/* Fish emoji */}
+            <Text style={styles.fishDetailEmoji}>🐟</Text>
+
+            {/* Habitat */}
+            <View style={[styles.detailSection, { borderBottomColor: theme.border }]}>
+              <Text style={[styles.detailLabel, { color: theme.subtext }]}>HABITAT</Text>
+              <Text style={[styles.detailValue, { color: theme.text }]}>
+                {selectedFish?.habitat || 'Unknown'}
+              </Text>
+            </View>
+
+            {/* Description */}
+            <View style={[styles.detailSection, { borderBottomColor: theme.border }]}>
+              <Text style={[styles.detailLabel, { color: theme.subtext }]}>DESCRIPTION</Text>
+              <Text style={[styles.detailValue, { color: theme.text }]}>
+                {selectedFish?.description || 'No description available'}
+              </Text>
+            </View>
+          </ScrollView>
+        </View>
+      </Modal>
     </View>
   );
 }
+      
 
 const styles = StyleSheet.create({
   container:       { flex: 1 },
@@ -286,9 +347,7 @@ const styles = StyleSheet.create({
   regionLabelText: { fontSize: 14, fontWeight: '600', textAlign: 'center' },
   modalOverlay:    { flex: 1, justifyContent: 'flex-end', backgroundColor: 'rgba(0,0,0,0.5)' },
   modalContent:    { borderTopLeftRadius: 20, borderTopRightRadius: 20, padding: 20, maxHeight: '75%' },
-  modalHeader:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },
-  modalTitle:      { fontSize: 22, fontWeight: 'bold' },
-  fishCount:       { fontSize: 14, marginBottom: 16 },
+  modalHeader:     { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 },  fishCount:       { fontSize: 14, marginBottom: 16 },
   fishList:        { paddingBottom: 20 },
   fishCard:        { borderRadius: 10, padding: 14, marginBottom: 10, borderWidth: 1 },
   fishCardHeader:  { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
@@ -296,6 +355,22 @@ const styles = StyleSheet.create({
   caughtBadge:     { fontSize: 12, color: '#4CAF50', fontWeight: '600' },
   fishHabitat:     { fontSize: 12, marginBottom: 4 },
   fishDescription: { fontSize: 13 },
-  locationLoadingOverlay: { position: 'absolute', top: '50%', left: '50%', marginLeft: -20, marginTop: -20 },
+  locationLoadingOverlay: { 
+    position: 'absolute', 
+    top: 0, 
+    left: 0, 
+    right: 0, 
+    bottom: 0, 
+    justifyContent: 'center', 
+    alignItems: 'center',
+    backgroundColor: 'rgba(0,0,0,0.1)'  //slight dim while loading
+  },
+  fishDetailEmoji:      { fontSize: 80, textAlign: 'center', marginVertical: 20 },
+  caughtBadgeContainer: { backgroundColor: '#e8f5e9', borderRadius: 20, paddingHorizontal: 12, paddingVertical: 4, alignSelf: 'flex-start', marginBottom: 8 },
+  caughtBadgeText:      { color: '#4CAF50', fontWeight: '600', fontSize: 14 },
+  detailSection:        { paddingVertical: 14, borderBottomWidth: 1, marginBottom: 4 },
+  detailLabel:          { fontSize: 12, fontWeight: '600', marginBottom: 6 },
+  detailValue:          { fontSize: 16 },
+  modalTitle:           { fontSize: 22, fontWeight: 'bold', flex: 1 },
 
 });

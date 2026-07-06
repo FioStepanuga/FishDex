@@ -130,6 +130,35 @@ namespace FishDex
             return fishList;
         }
 
+        public List<string> GetFishRegions(int fishId)
+        {
+            string sql = @"
+        SELECT r.region_name 
+        FROM regions r
+        JOIN fish_regions fr ON r.region_id = fr.region_id
+        WHERE fr.fish_id = @fishId
+        ORDER BY r.region_name;";
+
+            var regions = new List<string>();
+
+            using (var conn = new NpgsqlConnection(_connectionString))
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("fishId", fishId);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            regions.Add(reader.GetString(0));
+                        }
+                    }
+                }
+            }
+            return regions;
+        }
+
         //-------------------------------------------------------------------------------------------------------------------------------
 
         public object GetUserProgress(int userId)
@@ -193,6 +222,46 @@ namespace FishDex
             return new { total = 0, caught = 0 };
         }
 
+        //----------------------------------------------------------------------------------------------------------------------------
+        public List<FishModel> GetAllFishWithCaughtStatus(int userId)
+        {
+            string sql = @"
+        SELECT 
+            f.fish_id,
+            f.fish_name,
+            f.habitat,
+            f.description,
+            CASE WHEN cf.fish_id IS NOT NULL THEN true ELSE false END as is_caught
+        FROM fish f
+        LEFT JOIN caught_fish cf ON f.fish_id = cf.fish_id AND cf.user_id = @userId
+        ORDER BY f.fish_name;";
 
+            var fishList = new List<FishModel>();
+
+            using (var conn = new NpgsqlConnection(_connectionString))
+            {
+                conn.Open();
+                using (var cmd = new NpgsqlCommand(sql, conn))
+                {
+                    cmd.Parameters.AddWithValue("userId", userId);
+                    using (var reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            fishList.Add(new FishModel
+                            {
+                                FishId = reader.GetInt32(0),
+                                FishName = reader.GetString(1),
+                                Habitat = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                                Description = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                                IsCaught = reader.GetBoolean(4)
+                            });
+                        }
+                    }
+                }
+            }
+            return fishList;
+        }
+        //-----------------------------------------------------------------------------------------------------------------------
     }
 }

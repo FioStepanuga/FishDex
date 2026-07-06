@@ -3,58 +3,84 @@ import { useAuth } from '@/context/auth';
 import { useTheme } from '@/context/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
-import React from 'react';
-import { Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
+import { useEffect, useState } from 'react';
+import { ActivityIndicator, Pressable, ScrollView, StyleSheet, Switch, Text, View } from 'react-native';
 
+type Progress = {
+  total: number;
+  caught: number;
+};
 
 export default function AccountScreen() {
+  const { theme, isDark, toggleTheme } = useTheme();
   const { username, setIsLoggedIn, setUsername, token, setToken } = useAuth();
   const router = useRouter();
-  const { theme, isDark, toggleTheme} = useTheme();
 
-  const user = {
-    username: username,
-    email: "student@university.edu",  //mock data that needs to be gotten from database eventually
-    level: 42,
-    fishCaught: 12,
+  const [progress, setProgress] = useState<Progress | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchProgress();
+  }, []);
+
+  const fetchProgress = async () => {
+    setLoading(true);
+    try {
+      const response = await fetch(`${API_URL}/api/Explore/progress`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setProgress(data);
+      }
+    } catch (error) {
+      console.log('Progress fetch error:', error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSignOut = async () => {
-  try {
-    // tell the server to invalidate the token
-    await fetch(`${API_URL}/api/Logout`, {
-      method: 'DELETE',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(token)  // send the token to delete
-    });
-  } catch (error) {
-    console.log('Logout error:', error);
-  }
+    try {
+      await fetch(`${API_URL}/api/Logout`, {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(token)
+      });
+    } catch (error) {
+      console.log('Logout error:', error);
+    }
 
-  // clear local storage regardless of server response
-  setIsLoggedIn(false);
-  setUsername('');
-  setToken('');
-  router.replace('/login');
-};
+    setIsLoggedIn(false);
+    setUsername('');
+    setToken('');
+    router.replace('/login');
+  };
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>
       <View style={[styles.header, { backgroundColor: theme.card, borderBottomColor: theme.border }]}>
         <Ionicons name="person-circle" size={100} color={theme.primary} />
         <Text style={[styles.username, { color: theme.text }]}>{username}</Text>
-        <Text style={[styles.email, { color: theme.subtext }]}>student@university.edu</Text>
       </View>
 
       <View style={styles.infoSection}>
         <Text style={[styles.sectionTitle, { color: theme.text }]}>Profile Details</Text>
+
         <View style={[styles.detailRow, { borderBottomColor: theme.border }]}>
           <Text style={[styles.label, { color: theme.subtext }]}>Level:</Text>
-          <Text style={[styles.value, { color: theme.text }]}>42</Text>
+          <Text style={[styles.value, { color: theme.text }]}>Coming Soon</Text>
         </View>
+
         <View style={[styles.detailRow, { borderBottomColor: theme.border }]}>
           <Text style={[styles.label, { color: theme.subtext }]}>Fish in Dex:</Text>
-          <Text style={[styles.value, { color: theme.text }]}>12</Text>
+          {loading ? (
+            <ActivityIndicator size="small" color="#007AFF" />
+          ) : (
+            <Text style={[styles.value, { color: theme.text }]}>
+              {progress ? `${progress.caught} / ${progress.total}` : '0 / 0'}
+            </Text>
+          )}
         </View>
       </View>
 
@@ -81,44 +107,34 @@ export default function AccountScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
   },
   header: {
     alignItems: 'center',
     padding: 40,
-    backgroundColor: '#fff',
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   username: {
     fontSize: 24,
     fontWeight: 'bold',
     marginTop: 10,
   },
-  email: {
-    color: '#666',
-    fontSize: 16,
-  },
   infoSection: {
     padding: 20,
-    marginTop: 20,
   },
   sectionTitle: {
     fontSize: 18,
     fontWeight: '600',
     marginBottom: 15,
-    color: '#333',
   },
   detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
+    alignItems: 'center',
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: '#eee',
   },
   label: {
     fontSize: 16,
-    color: '#555',
   },
   value: {
     fontSize: 16,

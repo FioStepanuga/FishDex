@@ -63,5 +63,30 @@ namespace FishDex.Controllers
             var progress = fishManager.GetRegionProgress(userId, regionId);
             return Ok(progress);
         }
+
+        // GET api/Explore/fishdex — get all fish with caught status
+        [HttpGet("fishdex")]
+        public IActionResult GetFishDex()
+        {
+            var userIdClaim = User.FindFirst("userId")?.Value;
+            if (userIdClaim == null) return Unauthorized();
+            int userId = int.Parse(userIdClaim);
+
+            var fishManager = new Fish(_connectionString);
+            var allFish = fishManager.GetAllFishWithCaughtStatus(userId);
+
+            // Add regions to each fish
+            var result = allFish.Select(f => new
+            {
+                f.FishId,
+                f.FishName,
+                f.Habitat,
+                f.Description,
+                f.IsCaught,
+                Regions = fishManager.GetFishRegions(f.FishId)
+            });
+
+            return Ok(result);
+        }
     }
 }

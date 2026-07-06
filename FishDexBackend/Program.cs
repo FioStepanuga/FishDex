@@ -14,12 +14,6 @@ namespace FishDex
             var userManager = new Users(connectionString);
             var logManager = new Logs(connectionString);
 
-            //logManager.GetUserLogs(10);
-
-            //userManager.InsertUser("jdoewife", "password321");
-            //userManager.DeleteUser(8);
-            //bool found_user = userManager.GetUser("jdoe", "password123");
-            //userManager.UpdatePassword(1, "password123");
 
 
 
