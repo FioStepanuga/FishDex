@@ -9,7 +9,12 @@ namespace FishDex.Controllers
     [Authorize]
     public class ExploreController : ControllerBase
     {
-        private readonly string _connectionString = "Host=localhost;Port=5432;Username=postgres;Password=FioTennisPro7002!;Database=fishdex";
+        private readonly string _connectionString;
+
+        public ExploreController(IConfiguration configuration)
+        {
+            _connectionString = configuration["ConnectionString"];
+        }
 
         // GET api/Explore/region/3 — get all fish in a region with caught status
         [HttpGet("region/{regionId}")]

@@ -5,7 +5,13 @@ using Microsoft.AspNetCore.Mvc;
 [ApiController]
 public class LogoutController : ControllerBase
 {
-    private readonly string _connectionString = "Host=localhost;Port=5432;Username=postgres;Password=FioTennisPro7002!;Database=fishdex";
+    private readonly string _connectionString;
+
+
+    public LogoutController(IConfiguration configuration)
+    {
+        _connectionString = configuration["ConnectionString"];
+    }
 
     [HttpDelete]
     public IActionResult Delete([FromBody] string token)

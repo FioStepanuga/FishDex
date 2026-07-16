@@ -1,6 +1,6 @@
-import { API_URL } from '@/constants/api';
 import { useAuth } from '@/context/auth';
 import { useTheme } from '@/context/theme';
+import { authFetch } from '@/utils/api';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from 'expo-location';
 import { useRouter } from 'expo-router';
@@ -8,6 +8,7 @@ import { useState } from 'react';
 import { ActivityIndicator, Alert, Image, Pressable, StyleSheet, Text, View } from 'react-native';
 
 export default function IdentifyScreen() {
+  const { clearAuthState } = useAuth();
   const { token } = useAuth();
   const { theme } = useTheme();
   const router = useRouter();
@@ -109,19 +110,20 @@ const identifyFish = async (
 ) => {
   setLoading(true);
   try {
-    const response = await fetch(`${API_URL}/api/Identify`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+    const response = await authFetch(
+      '/api/Identify',
+      token,
+      {
+        method: 'POST',
+        body: JSON.stringify({
+          imageBase64: base64,
+          mimeType: mime,
+          latitude: loc?.latitude ?? null,
+          longitude: loc?.longitude ?? null
+        })
       },
-      body: JSON.stringify({
-        imageBase64: base64,
-        mimeType: mime,
-        latitude: loc?.latitude ?? null,
-        longitude: loc?.longitude ?? null
-      })
-    });
+      async () => { await clearAuthState(); router.replace('/login'); }
+    );
 
     const data = await response.json();
 

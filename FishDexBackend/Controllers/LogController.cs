@@ -10,7 +10,12 @@ namespace FishDex.Controllers
     [Authorize]  // every endpoint in this controller requires a valid token
     public class LogController : ControllerBase
     {
-        private readonly string _connectionString = "Host=localhost;Port=5432;Username=postgres;Password=FioTennisPro7002!;Database=fishdex";
+        private readonly string _connectionString;
+
+        public LogController(IConfiguration configuration)
+        {
+            _connectionString = configuration["ConnectionString"];
+        }
 
         // GET api/Log — fetch all logs for the logged in user
         [HttpGet]

@@ -1,6 +1,6 @@
-import { API_URL } from '@/constants/api';
 import { useAuth } from '@/context/auth';
 import { useTheme } from '@/context/theme';
+import { authFetch } from '@/utils/api';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
@@ -13,8 +13,10 @@ type Progress = {
 
 export default function AccountScreen() {
   const { theme, isDark, toggleTheme } = useTheme();
-  const { username, setIsLoggedIn, setUsername, token, setToken } = useAuth();
   const router = useRouter();
+  const { username, token, clearAuthState } = useAuth();
+
+
 
   const [progress, setProgress] = useState<Progress | null>(null);
   const [loading, setLoading] = useState(true);
@@ -26,9 +28,12 @@ export default function AccountScreen() {
   const fetchProgress = async () => {
     setLoading(true);
     try {
-      const response = await fetch(`${API_URL}/api/Explore/progress`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await authFetch(
+        '/api/Explore/progress',
+        token,
+        { method: 'GET' },
+        async () => { await clearAuthState(); router.replace('/login'); }
+      );
       if (response.ok) {
         const data = await response.json();
         setProgress(data);
@@ -42,18 +47,20 @@ export default function AccountScreen() {
 
   const handleSignOut = async () => {
     try {
-      await fetch(`${API_URL}/api/Logout`, {
-        method: 'DELETE',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(token)
-      });
+      await authFetch(
+        '/api/Logout',
+        token,
+        {
+          method: 'DELETE',
+          body: JSON.stringify(token)
+        },
+        async () => {}  // ← no redirect needed, we're already logging out
+      );
     } catch (error) {
       console.log('Logout error:', error);
     }
 
-    setIsLoggedIn(false);
-    setUsername('');
-    setToken('');
+    await clearAuthState();
     router.replace('/login');
   };
 

@@ -10,7 +10,12 @@ namespace FishDex.Controllers
     public class SignUpController : ControllerBase
     {
 
-        string connectionString = "Host=localhost;Port=5432;Username=postgres;Password=FioTennisPro7002!;Database=fishdex";
+        private readonly string _connectionString;
+
+        public SignUpController(IConfiguration configuration)
+        {
+            _connectionString = configuration["ConnectionString"];
+        }
 
         // GET: api/<SignUpController>
         [HttpGet]
@@ -30,23 +35,12 @@ namespace FishDex.Controllers
         [HttpPost]
         public IActionResult Post([FromBody] UserLogin login)
         {
-            var userManager = new Users(connectionString);
+            var userManager = new Users(_connectionString);
             
             userManager.InsertUser(login.UserName, login.Password);
 
             return Ok(new { success = true, message = "User inserted successfully" });
         }
 
-        // PUT api/<SignUpController>/5
-        [HttpPut("{id}")]
-        public void Put(int id, [FromBody] string value)
-        {
-        }
-
-        // DELETE api/<SignUpController>/5
-        [HttpDelete("{id}")]
-        public void Delete(int id)
-        {
-        }
     }
 }

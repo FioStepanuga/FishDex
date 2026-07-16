@@ -1,9 +1,9 @@
-import { API_URL } from '@/constants/api';
 import { useAuth } from '@/context/auth';
 import { useTheme } from '@/context/theme';
+import { authFetch } from '@/utils/api';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
-import { useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator, Alert,
@@ -32,6 +32,8 @@ type Log = {
 export default function LogScreen() {
   const { token } = useAuth();
   const { theme } = useTheme();
+  const router = useRouter();
+  const { clearAuthState } = useAuth();
   const params = useLocalSearchParams();
 
   const [logs, setLogs] = useState<Log[]>([]);
@@ -70,12 +72,12 @@ export default function LogScreen() {
   const fetchLogs = async () => {
     setLoadingLogs(true);
     try {
-      const response = await fetch(`${API_URL}/api/Log`, {
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        }
-      });
+      const response = await authFetch(
+        '/api/Log',
+        token,
+        { method: 'GET' },
+        async () => { await clearAuthState(); router.replace('/login'); }
+      );
       if (response.ok) {
         const data = await response.json();
         setLogs(data);
@@ -83,7 +85,7 @@ export default function LogScreen() {
     } catch (error) {
       Alert.alert('Error', String(error));
     } finally {
-    setLoadingLogs(false);  
+      setLoadingLogs(false);
     }
   };
 
@@ -155,18 +157,15 @@ const handleSaveLog = async () => {
 
   try {
     const isEditing = editingLog !== null;
-    const url = isEditing
-      ? `${API_URL}/api/Log/${editingLog.logId}`
-      : `${API_URL}/api/Log`;
-
-    const response = await fetch(url, {
-      method: isEditing ? 'PUT' : 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
+    const response = await authFetch(
+      isEditing ? `/api/Log/${editingLog.logId}` : '/api/Log',
+      token,
+      {
+        method: isEditing ? 'PUT' : 'POST',
+        body: JSON.stringify(logData)
       },
-      body: JSON.stringify(logData)
-    });
+      async () => { await clearAuthState(); router.replace('/login'); }
+    );
 
     if (response.ok) {
       setModalVisible(false);
@@ -191,10 +190,12 @@ const handleSaveLog = async () => {
           style: 'destructive',
           onPress: async () => {
             try {
-              const response = await fetch(`${API_URL}/api/Log/${logId}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': `Bearer ${token}` }
-              });
+              const response = await authFetch(
+                `/api/Log/${logId}`,
+                token,
+                { method: 'DELETE' },
+                async () => { await clearAuthState(); router.replace('/login'); }
+              );
               if (response.ok) {
                 fetchLogs();
               } else {
@@ -208,6 +209,7 @@ const handleSaveLog = async () => {
       ]
     );
   };
+
 
   const handlePickPhoto = async () => {
     const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();

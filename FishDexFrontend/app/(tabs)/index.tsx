@@ -1,6 +1,7 @@
-import { API_URL } from '@/constants/api';
 import { useAuth } from '@/context/auth';
 import { useTheme } from '@/context/theme';
+import { authFetch } from '@/utils/api';
+import { useRouter } from 'expo-router';
 import { useEffect, useState } from 'react';
 import {
   ActivityIndicator,
@@ -43,8 +44,9 @@ type RegionProgress = {
 };
 
 export default function HomeScreen() {
-  const { token } = useAuth();
   const { theme } = useTheme();
+  const router = useRouter();
+  const { token, clearAuthState } = useAuth();
 
   const [overallProgress, setOverallProgress] = useState<Progress | null>(null);
   const [fishDex, setFishDex] = useState<FishEntry[]>([]);
@@ -65,9 +67,12 @@ export default function HomeScreen() {
   const fetchOverallProgress = async () => {
     setLoadingProgress(true);
     try {
-      const response = await fetch(`${API_URL}/api/Explore/progress`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await authFetch(
+        '/api/Explore/progress',
+        token,
+        { method: 'GET' },
+        async () => { await clearAuthState(); router.replace('/login'); }
+      );
       if (response.ok) {
         const data = await response.json();
         setOverallProgress(data);
@@ -82,9 +87,12 @@ export default function HomeScreen() {
   const fetchFishDex = async () => {
     setLoadingFishDex(true);
     try {
-      const response = await fetch(`${API_URL}/api/Explore/fishdex`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await authFetch(
+        '/api/Explore/fishdex',
+        token,
+        { method: 'GET' },
+        async () => { await clearAuthState(); router.replace('/login'); }
+      );
       if (response.ok) {
         const data = await response.json();
         setFishDex(data);
@@ -99,9 +107,12 @@ export default function HomeScreen() {
   const fetchRegionProgress = async (regionId: number) => {
     if (regionProgress[regionId]) return;
     try {
-      const response = await fetch(`${API_URL}/api/Explore/progress/region/${regionId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
+      const response = await authFetch(
+        `/api/Explore/progress/region/${regionId}`,
+        token,
+        { method: 'GET' },
+        async () => { await clearAuthState(); router.replace('/login'); }
+      );
       if (response.ok) {
         const data = await response.json();
         setRegionProgress(prev => ({ ...prev, [regionId]: data }));
@@ -109,7 +120,7 @@ export default function HomeScreen() {
     } catch (error) {
       console.log('Region progress error:', error);
     }
-  };
+};
 
   const toggleRegion = (regionId: number) => {
     if (expandedRegions.includes(regionId)) {

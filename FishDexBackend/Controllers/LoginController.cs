@@ -11,11 +11,12 @@ namespace FishDex.Controllers
     [ApiController]
     public class LoginController : ControllerBase
     {
-        private readonly string _connectionString = "Host=localhost;Port=5432;Username=postgres;Password=FioTennisPro7002!;Database=fishdex";
+        private readonly string _connectionString;
         private readonly string _jwtKey;
 
         public LoginController(IConfiguration configuration)
         {
+            _connectionString = configuration["ConnectionString"];
             _jwtKey = configuration["JwtKey"];
         }
 
@@ -56,6 +57,13 @@ namespace FishDex.Controllers
             var tokenString = tokenHandler.WriteToken(token);
             userManager.SaveToken(username, tokenString);
             return Ok(new { token = tokenString, username = username });
+        }
+
+        // GET api/Log/validate — just checks if token is valid
+        [HttpGet("validate")]
+        public IActionResult Validate()
+        {
+            return Ok(new { valid = true });
         }
     }
 }

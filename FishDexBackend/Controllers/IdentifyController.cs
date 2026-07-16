@@ -11,12 +11,14 @@ namespace FishDex.Controllers
     [Authorize]
     public class IdentifyController : ControllerBase
     {
-        private readonly string _connectionString = "Host=localhost;Port=5432;Username=postgres;Password=FioTennisPro7002!;Database=fishdex";
+        private readonly string _connectionString;
         private readonly string _openAIKey;
 
         public IdentifyController(IConfiguration configuration)
         {
             _openAIKey = configuration["OpenAIKey"];
+            _connectionString = configuration["ConnectionString"];
+
         }
 
         [HttpPost]

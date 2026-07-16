@@ -1,8 +1,9 @@
 import regionsData from '@/assets/FWS_National_Regional_Boundaries.json';
-import { API_URL } from '@/constants/api';
 import { useAuth } from '@/context/auth';
 import { useTheme } from '@/context/theme';
+import { authFetch } from '@/utils/api';
 import * as Location from 'expo-location';
+import { useRouter } from 'expo-router';
 import { useEffect, useRef, useState } from 'react';
 import {
   ActivityIndicator,
@@ -68,6 +69,8 @@ type FishEntry = {
 };
 
 export default function ExploreScreen() {
+  const router = useRouter();
+  const { clearAuthState } = useAuth();
   const { token } = useAuth();
   const { theme } = useTheme();
   const mapRef = useRef<MapView>(null);
@@ -139,33 +142,31 @@ useEffect(() => {
 };
 
 
-  const handleRegionPress = async (region: typeof USFWS_REGIONS[0]) => {
-    setSelectedRegion(region);
-    setModalVisible(true);
-    setLoading(true);
+const handleRegionPress = async (region: typeof USFWS_REGIONS[0]) => {
+  setSelectedRegion(region);
+  setModalVisible(true);
+  setLoading(true);
 
-    console.log('Fetching:', `${API_URL}/api/Explore/region/${region.id}`);
-    console.log('Token:', token?.substring(0, 20));
+  try {
+    const response = await authFetch(
+      `/api/Explore/region/${region.id}`,
+      token,
+      { method: 'GET' },
+      async () => { await clearAuthState(); router.replace('/login'); }
+    );
 
-    try {
-      const response = await fetch(`${API_URL}/api/Explore/region/${region.id}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-
-      console.log('Response status:', response.status);
-
-      if (response.ok) {
-        const data = await response.json();
-        setRegionFish(data);
-      } else {
-        Alert.alert('Error', 'Failed to load fish for this region');
-      }
-    } catch (error) {
-      Alert.alert('Error', String(error));
-    } finally {
-      setLoading(false);
+    if (response.ok) {
+      const data = await response.json();
+      setRegionFish(data);
+    } else {
+      Alert.alert('Error', 'Failed to load fish for this region');
     }
-  };
+  } catch (error) {
+    Alert.alert('Error', String(error));
+  } finally {
+    setLoading(false);
+  }
+};
 
 const renderFishItem = ({ item }: { item: FishEntry }) => (
   <Pressable
