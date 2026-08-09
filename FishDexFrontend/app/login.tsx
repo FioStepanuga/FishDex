@@ -13,25 +13,39 @@ export default function LoginScreen() {
   const router = useRouter();
 
   const handleLogin = async () => {
+    // Validation
+    if (!username.trim()) {
+      Alert.alert('Error', 'Please enter your username');
+      return;
+    }
+    if (!password.trim()) {
+      Alert.alert('Error', 'Please enter your password');
+      return;
+    }
+    if (password.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters');
+      return;
+    }
+
     try {
       const response = await fetch(`${API_URL}/api/Login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ UserName: username, Password: password })
+        body: JSON.stringify({ UserName: username.trim(), Password: password })
       });
 
       const result = await response.json();
 
       if (response.ok) {
-        setToken(result.token);           // ← save the token
-        setAuthUsername(result.username); // ← save the username
+        setToken(result.token);
+        setAuthUsername(result.username);
         setIsLoggedIn(true);
         router.replace('/');
       } else {
-        Alert.alert("Error", result.message || "Invalid username or password");
+        Alert.alert('Error', result.message || 'Invalid username or password');
       }
     } catch (error) {
-      Alert.alert("Error", String(error));
+      Alert.alert('Error', String(error));
     }
   };
 

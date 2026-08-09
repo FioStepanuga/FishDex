@@ -9,13 +9,46 @@ export default function SignUpScreen() {
   const router = useRouter();
 
   const handleSignUp = async () => {
-    try {
+    // Validation
+    if (!username.trim()) {
+      Alert.alert('Error', 'Please enter a username');
+      return;
+    }
+    if (username.trim().length < 3) {
+      Alert.alert('Error', 'Username must be at least 3 characters');
+      return;
+    }
+    if (username.trim().length > 20) {
+      Alert.alert('Error', 'Username must be 20 characters or less');
+      return;
+    }
+    if (!/^[a-zA-Z0-9_]+$/.test(username.trim())) {
+      Alert.alert('Error', 'Username can only contain letters, numbers and underscores');
+      return;
+    }
+    if (!password) {
+      Alert.alert('Error', 'Please enter a password');
+      return;
+    }
+    if (password.length < 6) {
+      Alert.alert('Error', 'Password must be at least 6 characters');
+      return;
+    }
+    if (!/[A-Z]/.test(password)) {
+      Alert.alert('Error', 'Password must contain at least one uppercase letter');
+      return;
+    }
+    if (!/[0-9]/.test(password)) {
+      Alert.alert('Error', 'Password must contain at least one number');
+      return;
+    }
 
+    try {
       const response = await fetch(`${API_URL}/api/SignUp`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          Username: username,
+          Username: username.trim().toLowerCase(),
           Password: password
         })
       });
@@ -23,14 +56,13 @@ export default function SignUpScreen() {
       const result = await response.json();
 
       if (response.ok) {
-        Alert.alert("Success", "Signed up to FishDex!");
-        setIsLoggedIn(true);
+        Alert.alert('Success', 'Account created! Please log in.');
         router.replace('/login');
       } else {
-        Alert.alert("Error", result.message || "Invalid Username or Password");
+        Alert.alert('Error', result.message || 'Username already taken');
       }
     } catch (error) {
-      Alert.alert(String(error));
+      Alert.alert('Error', String(error));
     }
   };
 

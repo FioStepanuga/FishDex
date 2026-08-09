@@ -15,36 +15,33 @@ namespace FishDex
             _connectionString = connectionString;
         }
 
-        public void InsertUser(string username, string password) { // Inserts new user into the database
-
+        public bool InsertUser(string username, string password)
+        {
             string passwordHash = BCrypt.Net.BCrypt.HashPassword(password);
-
             string sql = "INSERT INTO users (username, \"password\") VALUES (@username, @passwordHash)";
 
-            using (var conn = new NpgsqlConnection(_connectionString)) // creates new connection and opens it
+            using (var conn = new NpgsqlConnection(_connectionString))
             {
                 conn.Open();
-
                 using (var cmd = new NpgsqlCommand(sql, conn))
                 {
                     try
                     {
-                        string cleanUsername = username.Trim().ToLower(); // trims out the spaces and makes the string lowercase
-
+                        string cleanUsername = username.Trim().ToLower();
                         cmd.Parameters.AddWithValue("username", cleanUsername);
                         cmd.Parameters.AddWithValue("passwordHash", passwordHash);
                         cmd.ExecuteNonQuery();
-                        Console.WriteLine("User registered successfully!");
+                        return true;  // ← success
                     }
-                    catch (PostgresException ex) when (ex.SqlState == "23505") // 23505 is the specific code for Unique Violation
+                    catch (PostgresException ex) when (ex.SqlState == "23505")
                     {
-                        Console.WriteLine("Error: That username is already taken. Please choose another.");
+                        return false;  // ← username already taken
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"An unexpected error occurred while inserting: {ex.Message}");
+                        Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+                        return false;
                     }
-
                 }
             }
         }

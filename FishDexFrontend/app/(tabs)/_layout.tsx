@@ -4,48 +4,59 @@ import React from 'react';
 import { HapticTab } from '@/components/haptic-tab';
 import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Colors } from '@/constants/theme';
-import { useColorScheme } from '@/hooks/use-color-scheme';
+import { useTheme } from '@/context/theme';
 import { Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { Platform, Pressable } from 'react-native';
 
-
-
 export default function TabLayout() {
-  const colorScheme = useColorScheme();
-  const router = useRouter(); // Initialize the router hook
+  const { theme, isDark } = useTheme();
+  const router = useRouter();
 
   return (
     <Tabs
       screenOptions={{
-        tabBarActiveTintColor: Colors[colorScheme ?? 'light'].tint,
-        headerShown: false, // Default to hidden for all tabs
+        tabBarActiveTintColor: Colors[isDark ? 'dark' : 'light'].tint,
+        headerShown: false,
         tabBarButton: HapticTab,
+        tabBarInactiveTintColor: isDark ? '#aaaaaa' : '#666666',
         tabBarStyle: Platform.select({
-          ios: { position: 'absolute' },
-          default: {},
+          ios: {
+            position: 'absolute',
+            backgroundColor: isDark ? '#1a1a1a' : '#ffffff',
+            borderTopColor: isDark ? '#444444' : '#eeeeee',
+          },
+          default: {
+            backgroundColor: isDark ? '#1a1a1a' : '#ffffff',
+            borderTopColor: isDark ? '#444444' : '#eeeeee',
+          },
         }),
+        headerStyle: {
+          backgroundColor: isDark ? '#1a1a1a' : '#ffffff',
+        },
+        headerTintColor: isDark ? '#ffffff' : '#333333',
+        headerShadowVisible: false,
       }}>
-      
+
       <Tabs.Screen
         name="index"
         options={{
           title: 'Home',
-          headerShown: true, // OVERRIDE: Show the header on the Home screen
+          headerShown: true,
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
           headerRight: () => (
             <Pressable onPress={() => router.push('/account')}>
-              <Ionicons 
-                name="person-circle-outline" 
-                size={28} 
-                color={Colors[colorScheme ?? 'light'].text} 
-                style={{ marginRight: 15 }} 
+              <Ionicons
+                name="person-circle-outline"
+                size={28}
+                color={theme.text}
+                style={{ marginRight: 15 }}
               />
             </Pressable>
           ),
         }}
       />
-      
+
       <Tabs.Screen
         name="explore"
         options={{
@@ -53,6 +64,23 @@ export default function TabLayout() {
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
         }}
       />
+
+      <Tabs.Screen
+        name="log"
+        options={{
+          title: 'log',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="list.bullet" color={color} />,
+        }}
+      />
+
+      <Tabs.Screen
+        name="identify"
+        options={{
+          title: 'identify',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="camera.fill" color={color} />,
+        }}
+      />
+
     </Tabs>
   );
 }

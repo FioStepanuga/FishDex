@@ -45,24 +45,24 @@ export default function AccountScreen() {
     }
   };
 
-  const handleSignOut = async () => {
-    try {
-      await authFetch(
-        '/api/Logout',
-        token,
-        {
-          method: 'DELETE',
-          body: JSON.stringify(token)
-        },
-        async () => {}  // ← no redirect needed, we're already logging out
-      );
-    } catch (error) {
-      console.log('Logout error:', error);
-    }
+const handleSignOut = async () => {
+  try {
+    await authFetch(
+      '/api/Logout',
+      token,
+      {
+        method: 'DELETE',
+        body: JSON.stringify(token)
+      },
+      async () => {}
+    );
+  } catch (error) {
+    console.log('Logout error:', error);
+  }
 
-    await clearAuthState();
-    router.replace('/login');
-  };
+  router.replace('/login');
+  await clearAuthState();
+};
 
   return (
     <ScrollView style={[styles.container, { backgroundColor: theme.background }]}>

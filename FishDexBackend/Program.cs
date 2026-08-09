@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -40,6 +41,16 @@ namespace FishDex
                 app.MapOpenApi();
             }
 
+            builder.Services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+
+                // Security: Clear known networks/proxies if behind a trusted reverse proxy
+                options.KnownNetworks.Clear();
+                options.KnownProxies.Clear();
+            });
+
+            app.UseForwardedHeaders();
             app.UseAuthentication();
             app.UseAuthorization();
             app.MapControllers();

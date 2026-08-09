@@ -36,10 +36,14 @@ namespace FishDex.Controllers
         public IActionResult Post([FromBody] UserLogin login)
         {
             var userManager = new Users(_connectionString);
-            
-            userManager.InsertUser(login.UserName, login.Password);
+            bool success = userManager.InsertUser(login.UserName, login.Password);
 
-            return Ok(new { success = true, message = "User inserted successfully" });
+            if (!success)
+            {
+                return Conflict(new { message = "Username already taken. Please choose another." });
+            }
+
+            return Ok(new { success = true, message = "User registered successfully" });
         }
 
     }
