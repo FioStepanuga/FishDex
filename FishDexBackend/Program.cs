@@ -34,13 +34,6 @@ namespace FishDex
             builder.Services.AddControllers();
             builder.Services.AddOpenApi();
 
-            var app = builder.Build();
-
-            if (app.Environment.IsDevelopment())
-            {
-                app.MapOpenApi();
-            }
-
             builder.Services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
@@ -49,6 +42,13 @@ namespace FishDex
                 options.KnownNetworks.Clear();
                 options.KnownProxies.Clear();
             });
+
+            var app = builder.Build();
+
+            if (app.Environment.IsDevelopment())
+            {
+                app.MapOpenApi();
+            }
 
             app.UseForwardedHeaders();
             app.UseAuthentication();
