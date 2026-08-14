@@ -1,3 +1,4 @@
+using FishDex.Models;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
@@ -12,7 +13,17 @@ namespace FishDex
             var builder = WebApplication.CreateBuilder(args);
 
             // Now configuration is available via builder.Configuration
-            var jwtKey = builder.Configuration["JwtKey"];
+            var jwtKey = Environment.GetEnvironmentVariable("JwtKey") 
+                ?? builder.Configuration["JwtSettings:Key"] 
+                ?? throw new InvalidOperationException("JWT key not found");
+
+            var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING") 
+                ?? builder.Configuration["ConnectionString"]
+                ?? throw new InvalidOperationException("ConnectionString not found");
+
+            var openAIKey = Environment.GetEnvironmentVariable("OPENAI_KEY")
+                ?? builder.Configuration["OpenAIKey"]
+                ?? throw new InvalidOperationException("OpenAI key not found");
 
             builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 .AddJwtBearer(options =>
@@ -25,6 +36,12 @@ namespace FishDex
                         ValidateAudience = false
                     };
                 });
+
+            //builder.Services.AddSingleton(connectionString);
+            builder.Services.AddSingleton(new ConnectionString(connectionString));
+            builder.Services.AddSingleton(new OpenAISettings(openAIKey));
+            builder.Services.AddSingleton(new JwtSettings(jwtKey));
+
 
             builder.WebHost.ConfigureKestrel(options =>
             {
@@ -39,7 +56,7 @@ namespace FishDex
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
 
                 // Security: Clear known networks/proxies if behind a trusted reverse proxy
-                options.KnownNetworks.Clear();
+                options.KnownIPNetworks.Clear();
                 options.KnownProxies.Clear();
             });
 

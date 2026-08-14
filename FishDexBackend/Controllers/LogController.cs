@@ -12,9 +12,9 @@ namespace FishDex.Controllers
     {
         private readonly string _connectionString;
 
-        public LogController(IConfiguration configuration)
+        public LogController(IConfiguration configuration, ConnectionString connectionString)
         {
-            _connectionString = configuration["ConnectionString"];
+            _connectionString = connectionString.Value;
         }
 
         // GET api/Log — fetch all logs for the logged in user

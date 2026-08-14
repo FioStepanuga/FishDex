@@ -12,9 +12,9 @@ namespace FishDex.Controllers
 
         private readonly string _connectionString;
 
-        public SignUpController(IConfiguration configuration)
+        public SignUpController(IConfiguration configuration, ConnectionString connectionString)
         {
-            _connectionString = configuration["ConnectionString"];
+            _connectionString = connectionString.Value;
         }
 
         // GET: api/<SignUpController>

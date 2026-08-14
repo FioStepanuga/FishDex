@@ -14,10 +14,10 @@ namespace FishDex.Controllers
         private readonly string _connectionString;
         private readonly string _jwtKey;
 
-        public LoginController(IConfiguration configuration)
+        public LoginController(IConfiguration configuration, ConnectionString connectionString, JwtSettings jwtKey)
         {
-            _connectionString = configuration["ConnectionString"];
-            _jwtKey = configuration["JwtKey"];
+            _connectionString = connectionString.Value;
+            _jwtKey = jwtKey.Key;
         }
 
         [HttpPost]

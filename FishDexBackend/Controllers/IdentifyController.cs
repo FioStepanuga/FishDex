@@ -14,11 +14,10 @@ namespace FishDex.Controllers
         private readonly string _connectionString;
         private readonly string _openAIKey;
 
-        public IdentifyController(IConfiguration configuration)
+        public IdentifyController(IConfiguration configuration, OpenAISettings openAIKey, ConnectionString connectionString)
         {
-            _openAIKey = configuration["OpenAIKey"];
-            _connectionString = configuration["ConnectionString"];
-
+            _connectionString = connectionString.Value;
+            _openAIKey = openAIKey.Key;
         }
 
         [HttpPost]

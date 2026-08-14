@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using FishDex.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -11,9 +12,9 @@ namespace FishDex.Controllers
     {
         private readonly string _connectionString;
 
-        public ExploreController(IConfiguration configuration)
+        public ExploreController(IConfiguration configuration, ConnectionString connectionString)
         {
-            _connectionString = configuration["ConnectionString"];
+            _connectionString = connectionString.Value;
         }
 
         // GET api/Explore/region/3 — get all fish in a region with caught status

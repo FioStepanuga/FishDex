@@ -1,4 +1,5 @@
 ﻿using FishDex;
+using FishDex.Models;
 using Microsoft.AspNetCore.Mvc;
 
 [Route("api/[controller]")]
@@ -8,9 +9,9 @@ public class LogoutController : ControllerBase
     private readonly string _connectionString;
 
 
-    public LogoutController(IConfiguration configuration)
+    public LogoutController(IConfiguration configuration, ConnectionString connectionString)
     {
-        _connectionString = configuration["ConnectionString"];
+        _connectionString = connectionString.Value;
     }
 
     [HttpDelete]
