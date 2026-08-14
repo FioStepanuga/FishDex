@@ -14,7 +14,7 @@ namespace FishDex
 
             // Now configuration is available via builder.Configuration
             var jwtKey = Environment.GetEnvironmentVariable("JwtKey") 
-                ?? builder.Configuration["JwtSettings:Key"] 
+                ?? builder.Configuration["JwtKey"] 
                 ?? throw new InvalidOperationException("JWT key not found");
 
             var connectionString = Environment.GetEnvironmentVariable("CONNECTION_STRING") 
